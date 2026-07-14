@@ -1,0 +1,144 @@
+INVORALITE END USER LICENSE AGREEMENT (EULA)
+Version 1.0.0 | Effective: July 2026
+
+IMPORTANT — READ CAREFULLY BEFORE INSTALLING OR USING THIS SOFTWARE.
+
+This End User License Agreement ("Agreement") is a legal agreement between you
+(either an individual or a single business entity, "Licensee") and Gyan B. Baraily
+("Licensor") for the InvoraLite desktop software product, including
+associated documentation and updates (collectively, the "Software").
+
+By clicking "I Agree", installing, copying, or using the Software, you accept
+the terms of this Agreement. If you do not agree, do not install or use the
+Software.
+
+----------------------------------------------------------------------
+1. GRANT OF LICENSE
+----------------------------------------------------------------------
+Subject to your compliance with this Agreement and valid activation:
+
+  (a) Licensor grants you a non-exclusive, non-transferable, revocable license
+      to install and use one copy of the Software on a single Windows computer
+      for your internal business operations (inventory, sales, and accounting).
+
+  (b) Use is limited to the business named in your license or trial activation
+      and the device identified during activation.
+
+  (c) This license does not include rights to host, sublicense, rent, lease,
+      or provide the Software as a service to third parties.
+
+----------------------------------------------------------------------
+2. ACTIVATION, TRIAL, AND LICENSE KEYS
+----------------------------------------------------------------------
+  (a) The Software requires activation via a valid INVORA license key or an
+      authorised trial period (currently 60 days per device, where offered).
+
+  (b) License keys are device-bound. Transfer to another computer requires
+      deactivation or a new licence from Licensor.
+
+  (c) You must not share, publish, or circumvent license keys, activation
+      files, or technical protection measures.
+
+  (d) Licensor may verify activation status and may disable the Software if
+      the licence expires or is revoked.
+
+----------------------------------------------------------------------
+3. RESTRICTIONS
+----------------------------------------------------------------------
+You must NOT:
+
+  - Copy, modify, adapt, translate, or create derivative works of the Software
+    except as permitted by applicable law.
+  - Reverse engineer, decompile, or disassemble the Software except to the
+    extent expressly allowed by law.
+  - Remove or alter copyright, trademark, or proprietary notices.
+  - Use the Software for unlawful purposes or in violation of tax, GST, or
+    accounting regulations in your jurisdiction.
+  - Install the Software on more devices than your licence permits.
+
+----------------------------------------------------------------------
+4. YOUR DATA AND BACKUPS
+----------------------------------------------------------------------
+  (a) Business data you enter (products, sales, customers, etc.) remains yours.
+      The Software stores data locally on your computer.
+
+  (b) You are solely responsible for regular backups and safeguarding backup
+      passwords. Licensor is not liable for data loss due to hardware failure,
+      user error, malware, or failure to maintain backups.
+
+  (c) Encrypted backups and database protection depend on passwords and system
+      access controls you maintain.
+
+----------------------------------------------------------------------
+5. UPDATES AND SUPPORT
+----------------------------------------------------------------------
+  (a) Licensor may provide updates, patches, or new versions at its discretion.
+      Updates may be subject to separate terms.
+
+  (b) Support is provided according to your licence arrangement with Gyan B. Baraily
+      or your authorised InvoraLite reseller.
+
+----------------------------------------------------------------------
+6. INTELLECTUAL PROPERTY
+----------------------------------------------------------------------
+The Software is licensed, not sold. Licensor and its suppliers retain all right,
+title, and interest in the Software, including all copyrights, trademarks, and
+other intellectual property rights.
+
+----------------------------------------------------------------------
+7. DISCLAIMER OF WARRANTIES
+----------------------------------------------------------------------
+THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTY OF ANY
+KIND, WHETHER EXPRESS, IMPLIED, OR STATUTORY, INCLUDING BUT NOT LIMITED TO
+IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
+ACCURACY OF ACCOUNTING OR TAX REPORTS, AND NON-INFRINGEMENT.
+
+InvoraLite assists with inventory and reporting but does not replace
+professional accounting, tax, or legal advice. You are responsible for
+reviewing GST, tax submission, and financial reports before official filing.
+
+----------------------------------------------------------------------
+8. LIMITATION OF LIABILITY
+----------------------------------------------------------------------
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, LICENSOR SHALL NOT BE LIABLE
+FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR
+FOR LOSS OF PROFITS, DATA, GOODWILL, OR BUSINESS INTERRUPTION, ARISING FROM
+USE OR INABILITY TO USE THE SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY.
+
+LICENSOR'S TOTAL LIABILITY FOR ANY CLAIM ARISING FROM THIS AGREEMENT SHALL NOT
+EXCEED THE AMOUNT YOU PAID FOR THE SOFTWARE LICENCE IN THE TWELVE (12) MONTHS
+PRECEDING THE CLAIM, OR NU. 1,000 IF NO FEE WAS PAID.
+
+----------------------------------------------------------------------
+9. TERMINATION
+----------------------------------------------------------------------
+This Agreement terminates automatically if you breach any term. Upon
+termination, you must cease use and uninstall the Software. Sections that by
+nature should survive (including data responsibility, disclaimers, and
+limitation of liability) shall survive termination.
+
+----------------------------------------------------------------------
+10. GOVERNING LAW
+----------------------------------------------------------------------
+This Agreement is governed by the laws of the Kingdom of Bhutan, without regard
+to conflict-of-law principles. Disputes shall be subject to the exclusive
+jurisdiction of the courts of Bhutan, unless otherwise agreed in writing.
+
+----------------------------------------------------------------------
+11. ENTIRE AGREEMENT
+----------------------------------------------------------------------
+This Agreement constitutes the entire agreement regarding the Software and
+supersedes prior oral or written understandings. If any provision is held
+invalid, the remaining provisions remain in effect.
+
+----------------------------------------------------------------------
+12. CONTACT
+----------------------------------------------------------------------
+Gyan B. Baraily — InvoraLite Licensing & Support
+Email: (your support email)
+Website: (your website, if any)
+
+By selecting "I Agree" in the installer, you confirm that you have read and
+accept this Agreement on behalf of yourself or the business you represent.
+
+Copyright © 2026 Gyan B. Baraily. All rights reserved.

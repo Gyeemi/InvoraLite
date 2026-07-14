@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InvoraLite Installer</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden; background: #ffffff; user-select: none;
+  }
+  .installer-window {
+    display: flex; width: 100%; height: 100%;
+    background: #ffffff; overflow: hidden;
+  }
+  .left-pane {
+    flex: 1; padding: 36px 40px; display: flex; flex-direction: column;
+    justify-content: space-between; min-width: 0; background: #ffffff;
+  }
+  .logo-section {
+    display: flex; align-items: center; gap: 12px;
+    font-weight: 600; font-size: 1.2rem; color: #1f2937;
+  }
+  .logo-section img {
+    width: 40px; height: 40px; border-radius: 8px;
+    object-fit: contain; flex-shrink: 0;
+  }
+  .content-section { margin-top: 8px; flex: 1; }
+  h1 {
+    font-size: 1.45rem; color: #111827; margin: 0 0 12px;
+    line-height: 1.35; font-weight: 700; max-width: 320px;
+  }
+  p.subtext { color: #4b5563; font-size: 0.92rem; line-height: 1.5; margin: 0; max-width: 320px; }
+  .setup-fields { margin-top: 20px; max-width: 320px; }
+  .setup-fields label { display: block; font-size: 0.75rem; color: #6b7280; margin-bottom: 4px; }
+  .path-row { display: flex; gap: 6px; margin-bottom: 10px; }
+  .path-row input {
+    flex: 1; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px;
+    font-size: 0.8rem; color: #111827; background: #fff;
+  }
+  .path-row button {
+    padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 4px;
+    background: #f9fafb; cursor: pointer; font-size: 0.8rem;
+  }
+  .path-row button:hover { background: #f3f4f6; }
+  .license-link {
+    color: #4f46e5; font-size: 0.8rem; cursor: pointer; text-decoration: underline;
+    margin-bottom: 8px; display: inline-block;
+  }
+  .license-row {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 0.8rem; color: #374151; margin-bottom: 4px;
+  }
+  .license-row input { margin-top: 2px; accent-color: #4f46e5; }
+  .credit { font-size: 0.75rem; color: #9ca3af; }
+  .actions { margin-top: 16px; }
+  .btn-install {
+    padding: 8px 28px; border: 1px solid #4f46e5; border-radius: 4px;
+    background: #ffffff; color: #4f46e5; font-weight: 600; font-size: 0.85rem;
+    letter-spacing: 0.04em; cursor: pointer;
+  }
+  .btn-install:hover { background: #eef2ff; }
+  .btn-install:disabled { opacity: 0.5; cursor: not-allowed; }
+  .right-pane {
+    flex: 1.1; background: linear-gradient(135deg, #4f46e5 0%, #0d9488 100%);
+    position: relative; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; padding: 50px;
+    color: white; overflow: hidden;
+  }
+  .swoosh {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(circle at 85% 10%, rgba(255,255,255,0.18) 0%, transparent 55%);
+  }
+  .arc {
+    position: absolute; border: 2px solid rgba(34,211,238,0.35);
+    border-radius: 50%; pointer-events: none;
+  }
+  .arc1 { width: 520px; height: 520px; left: -80px; top: 60px; border-color: rgba(34,211,238,0.4); }
+  .arc2 { width: 480px; height: 480px; left: -40px; top: 100px; border-color: rgba(255,255,255,0.15); }
+  .progress-wrap { width: 100%; max-width: 300px; position: relative; z-index: 2; }
+  .progress-shell {
+    width: 100%; height: 28px; background: rgba(15,23,42,0.55);
+    border-radius: 14px; border: 1px solid rgba(34,211,238,0.55);
+    box-shadow: 0 0 16px rgba(34,211,238,0.35); overflow: hidden; position: relative;
+  }
+  .progress-track {
+    position: absolute; inset: 4px; border-radius: 10px;
+    background: rgba(255,255,255,0.12);
+  }
+  .progress-bar {
+    position: absolute; left: 4px; top: 4px; bottom: 4px; width: 0%;
+    background: linear-gradient(90deg, #22d3ee, #2dd4bf);
+    border-radius: 10px; box-shadow: 0 0 12px rgba(34,211,238,0.7);
+    transition: width 0.25s ease;
+  }
+  .progress-pct {
+    position: absolute; inset: 0; display: flex; align-items: center;
+    justify-content: center; font-size: 0.82rem; font-weight: 600; color: #fff; z-index: 3;
+  }
+  .status-text {
+    margin-top: 14px; text-align: center; font-size: 0.9rem;
+    color: rgba(255,255,255,0.92); z-index: 2; position: relative;
+  }
+  .right-idle-text {
+    font-size: 0.95rem; color: rgba(255,255,255,0.85); z-index: 2;
+    text-align: center; max-width: 280px; line-height: 1.5;
+  }
+  .screen { display: none; width: 100%; height: 100%; }
+  .screen.active { display: flex; }
+  .finish-actions { margin-top: 20px; }
+  .btn-launch {
+    padding: 8px 24px; border: none; border-radius: 4px;
+    background: #4f46e5; color: #fff; font-weight: 600; cursor: pointer; font-size: 0.85rem;
+  }
+  .btn-launch:hover { background: #4338ca; }
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="screen-setup" class="screen active installer-window">
+  <div class="left-pane">
+    <div>
+      <div class="logo-section">
+        <img id="app-icon" src="__ICON_SRC__" alt="InvoraLite logo" />
+        <span>InvoraLite</span>
+      </div>
+      <div class="content-section">
+        <h1>Streamlining your stock, sales, and inventory management.</h1>
+        <p class="subtext">InvoraLite will be ready in just a few moments.</p>
+        <div class="setup-fields">
+          <label>Install location</label>
+          <div class="path-row">
+            <input id="install-path" type="text" />
+            <button type="button" id="btn-browse">...</button>
+          </div>
+          <span class="license-link" id="btn-eula">View License terms and conditions</span>
+          <label class="license-row">
+            <input id="license-check" type="checkbox" />
+            <span>I agree to the License terms and conditions</span>
+          </label>
+        </div>
+        <div class="actions">
+          <button class="btn-install" id="btn-install">INSTALL</button>
+        </div>
+      </div>
+    </div>
+    <div class="credit">Developed by Gyan B. Baraily</div>
+  </div>
+  <div class="right-pane">
+    <div class="swoosh"></div>
+    <div class="arc arc1"></div>
+    <div class="arc arc2"></div>
+    <p class="right-idle-text">Review your settings on the left, then click Install to begin.</p>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div id="screen-progress" class="screen installer-window">
+  <div class="left-pane">
+    <div>
+      <div class="logo-section">
+        <img class="app-icon-clone" src="__ICON_SRC__" alt="" />
+        <span>InvoraLite</span>
+      </div>
+      <div class="content-section">
+        <h1>Streamlining your stock, sales, and inventory management.</h1>
+        <p class="subtext">InvoraLite will be ready in just a few moments.</p>
+      </div>
+    </div>
+    <div class="credit">Developed by Gyan B. Baraily</div>
+  </div>
+  <div class="right-pane">
+    <div class="swoosh"></div>
+    <div class="arc arc1"></div>
+    <div class="arc arc2"></div>
+    <div class="progress-wrap">
+      <div class="progress-shell">
+        <div class="progress-track"></div>
+        <div class="progress-bar" id="progress-bar"></div>
+        <div class="progress-pct" id="progress-pct">0%</div>
+      </div>
+      <div class="status-text">Now installing...</div>
+    </div>
+  </div>
+</div>
+
+<!-- FINISH -->
+<div id="screen-finish" class="screen installer-window">
+  <div class="left-pane">
+    <div>
+      <div class="logo-section">
+        <img class="app-icon-clone" src="__ICON_SRC__" alt="" />
+        <span>InvoraLite</span>
+      </div>
+      <div class="content-section">
+        <h1>InvoraLite is ready to use.</h1>
+        <p class="subtext">Launch InvoraLite now to start managing your inventory.</p>
+        <div class="finish-actions">
+          <button class="btn-launch" id="btn-launch">Launch InvoraLite</button>
+        </div>
+      </div>
+    </div>
+    <div class="credit">Developed by Gyan B. Baraily</div>
+  </div>
+  <div class="right-pane">
+    <div class="swoosh"></div>
+    <div class="arc arc1"></div>
+    <div class="arc arc2"></div>
+    <p class="right-idle-text">Installation completed successfully.</p>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  let progressTimer = null;
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    $(id).classList.add('active');
+  }
+
+  function setProgress(pct) {
+    const v = Math.max(0, Math.min(100, pct));
+    $('progress-bar').style.width = v + '%';
+    $('progress-pct').textContent = Math.round(v) + '%';
+  }
+
+  function startProgressAnimation() {
+    let p = 0;
+    clearInterval(progressTimer);
+    progressTimer = setInterval(() => {
+      if (p < 92) {
+        p += Math.random() * 2.5 + 0.5;
+        setProgress(p);
+      }
+    }, 180);
+  }
+
+  function stopProgressAnimation(finalPct) {
+    clearInterval(progressTimer);
+    setProgress(finalPct);
+  }
+
+  window.__onInstallDone = (ok, message) => {
+    stopProgressAnimation(ok ? 100 : 0);
+    if (ok) {
+      setTimeout(() => showScreen('screen-finish'), 400);
+    } else {
+      alert(message || 'Installation failed. Please try again.');
+      showScreen('screen-setup');
+    }
+  };
+
+  $('install-path').value = window.__DEFAULT_DIR__ || '';
+
+  $('btn-browse').addEventListener('click', () => {
+    window.ipc.postMessage(JSON.stringify({
+      cmd: 'browse',
+      dir: $('install-path').value.trim()
+    }));
+  });
+
+  $('btn-eula').addEventListener('click', () => {
+    window.ipc.postMessage(JSON.stringify({ cmd: 'eula' }));
+  });
+
+  $('btn-install').addEventListener('click', () => {
+    if (!$('license-check').checked) {
+      alert('Please accept the License terms and conditions to install InvoraLite.');
+      return;
+    }
+    const dir = $('install-path').value.trim();
+    if (!dir) {
+      alert('Please choose an install location.');
+      return;
+    }
+    window.__INSTALL_DIR__ = dir;
+    showScreen('screen-progress');
+    startProgressAnimation();
+    window.ipc.postMessage(JSON.stringify({ cmd: 'install', dir }));
+  });
+
+  $('btn-launch').addEventListener('click', () => {
+    window.ipc.postMessage(JSON.stringify({ cmd: 'launch', dir: window.__INSTALL_DIR__ || $('install-path').value }));
+  });
+
+  window.__onBrowseResult = (path) => {
+    if (path) $('install-path').value = path;
+  };
+</script>
+</body>
+</html>

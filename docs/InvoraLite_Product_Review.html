@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>InvoraLite — Product Quality Review &amp; Testing Checkup</title>
+  <style>
+    @page { margin: 1.8cm; size: A4; }
+    body { font-family: "Segoe UI", Arial, sans-serif; font-size: 10.5pt; line-height: 1.45; color: #0f172a; max-width: 820px; margin: 0 auto; padding: 20px; }
+    h1 { font-size: 21pt; border-bottom: 2px solid #4d7cfe; padding-bottom: 8px; margin-bottom: 4px; page-break-after: avoid; }
+    h2 { font-size: 13pt; color: #1e40af; margin-top: 22px; margin-bottom: 8px; page-break-after: avoid; }
+    h3 { font-size: 11pt; color: #334155; margin-top: 14px; margin-bottom: 6px; page-break-after: avoid; }
+    .meta { color: #64748b; font-size: 9.5pt; margin-bottom: 16px; }
+    .rating { font-size: 17pt; font-weight: 700; color: #16a34a; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 9.5pt; page-break-inside: avoid; }
+    th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; vertical-align: top; }
+    th { background: #f1f5f9; font-weight: 600; }
+    ul, ol { margin: 6px 0; padding-left: 20px; }
+    li { margin-bottom: 3px; }
+    pre { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; font-size: 8.5pt; overflow-x: auto; white-space: pre-wrap; page-break-inside: avoid; }
+    .footer { margin-top: 28px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 9.5pt; color: #64748b; }
+    .footer .date { font-size: 12pt; font-weight: 700; color: #0f172a; letter-spacing: 0.04em; margin-top: 6px; }
+    strong { color: #0f172a; }
+    p { margin: 8px 0; }
+    .tag-new { color: #16a34a; font-weight: 600; font-size: 8.5pt; }
+    .tag-done { color: #2563eb; font-weight: 600; font-size: 8.5pt; }
+    .tag-risk { color: #dc2626; font-weight: 600; font-size: 8.5pt; }
+    .pass { color: #16a34a; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <h1>InvoraLite — Product Quality Review</h1>
+  <p class="meta">
+    <strong>Review date:</strong> 13 July 2026 (late evening) &nbsp;|&nbsp;
+    <strong>Exported:</strong> <span data-export-date>13|07|2026</span> &nbsp;|&nbsp;
+    <strong>Version:</strong> 1.0.0 &nbsp;|&nbsp;
+    <strong>Stack:</strong> Tauri 2 + React 19 + SQLite &nbsp;|&nbsp;
+    <strong>Includes:</strong> Testing &amp; Quality Checkup
+  </p>
+
+  <h2>Executive Summary</h2>
+  <p class="rating">Overall Rating: 9.1 / 10</p>
+  <p>InvoraLite is a mature v1.0 offline desktop inventory and retail application for a single Windows store. Coverage includes sales, purchases, Rate Master, <strong>20-type Offers</strong>, Quotations, credit, GST invoices, analytics, accounting, two-stage returns, purchase history, supplier ledgers, and a <strong>loyalty points MVP</strong>.</p>
+  <p>This late-evening recheck closes several prior quality gaps: <strong>GitHub Actions CI</strong>, <strong>Playwright E2E smoke scaffolding</strong>, <strong>vault unclean-exit / logout seal hardening</strong>, and customer <strong>loyalty earn/redeem</strong>.</p>
+  <p>Automated checkup (this run): <strong>169 / 169 Vitest</strong>, <strong>30 / 30 Rust</strong>, <strong>2 / 2 Playwright smoke</strong>, TypeScript clean. Ready for trusted single-store deployment. Before wide public distribution: rotate license secrets and code-sign the installer (relational schema and auto-update remain future work).</p>
+
+  <h2>Rating Breakdown</h2>
+  <table>
+    <tr><th>Area</th><th>Score</th><th>Notes</th></tr>
+    <tr><td>Feature breadth</td><td><strong>9.4/10</strong></td><td>Returns + loyalty points MVP + full pricing hub</td></tr>
+    <tr><td>UX / polish</td><td><strong>8.4/10</strong></td><td>Return modals; loyalty redeem on New Sale; People points display</td></tr>
+    <tr><td>Business logic</td><td><strong>9.0/10</strong></td><td>Offers, quote→sale, returns, loyalty earn/redeem/reverse</td></tr>
+    <tr><td>Security</td><td><strong>8.5/10</strong></td><td>Vault refresh on unclean exit; seal on logout; license secret still ship-blocker</td></tr>
+    <tr><td>Data / reliability</td><td><strong>7.8/10</strong></td><td>Atomic batches; JSON-in-SQLite still the scale ceiling</td></tr>
+    <tr><td>Testing &amp; quality</td><td><strong>8.3/10</strong></td><td>CI + 169 Vitest + 30 Rust + Playwright smoke; no deep Tauri E2E yet</td></tr>
+    <tr><td>Deployment</td><td><strong>7.5/10</strong></td><td>NSIS; CI ready; no code signing / auto-update</td></tr>
+  </table>
+
+  <h2>Technology Stack</h2>
+  <table>
+    <tr><th>Layer</th><th>Technology</th></tr>
+    <tr><td>Desktop shell</td><td>Tauri 2, WebView2</td></tr>
+    <tr><td>Frontend</td><td>React 19, TypeScript 5.6 (strict), Vite 6, Tailwind 4</td></tr>
+    <tr><td>Charts</td><td>Recharts 2.15</td></tr>
+    <tr><td>Backend</td><td>Rust 2021 — src-tauri/src/</td></tr>
+    <tr><td>Database</td><td>SQLite via rusqlite (WAL); domain JSON in app_storage</td></tr>
+    <tr><td>Encryption</td><td>AES-256-GCM vault, Argon2id backups, Windows DPAPI key file</td></tr>
+    <tr><td>CI / E2E</td><td>GitHub Actions (windows-latest); Playwright Chromium smoke vs Vite</td></tr>
+    <tr><td>IPC</td><td>storage_get/set/set_many, seal_at_rest, ensure_open, refresh_vault, audit, auth, license, backup</td></tr>
+  </table>
+  <h3>Architecture</h3>
+  <pre>React (pages, components, lib/data.ts, returns.ts, loyalty.ts, cartOffers.ts)
+  → storage.ts (username + role as StorageContext)
+    → Tauri commands (storage_set_many; database_seal_at_rest / ensure_open)
+      → DatabaseManager (transactions · vault seal/unseal · RBAC · audit)</pre>
+
+  <h2>Feature Completeness</h2>
+  <table>
+    <tr><th>Module</th><th>Status</th><th>Notes</th></tr>
+    <tr><td>Products / Sales / Purchases</td><td><span class="tag-done">Complete</span></td><td>Atomic stock+sale; purchase history</td></tr>
+    <tr><td>Sales / Purchase Returns</td><td><span class="tag-done">Complete</span></td><td>Two-stage linked documents</td></tr>
+    <tr><td>Loyalty points</td><td><span class="tag-new">MVP</span></td><td>Earn on sale; redeem at till; reverse on return; LOYALTY offer rates</td></tr>
+    <tr><td>Rate Master / Offers / Quotations</td><td><span class="tag-done">Complete</span></td><td>20 offer types live; quote convert via submitSale</td></tr>
+    <tr><td>Users / RBAC</td><td><span class="tag-done">Aligned</span></td><td>Manager in Rust; return keys for roles</td></tr>
+    <tr><td>CI / E2E smoke</td><td><span class="tag-new">Shipped</span></td><td>.github/workflows/ci.yml + Playwright scaffolding</td></tr>
+  </table>
+
+  <h3>Gaps closed this programme (13|07|2026)</h3>
+  <table>
+    <tr><th>Prior gap</th><th>Resolution</th></tr>
+    <tr><td>No CI workflow</td><td><span class="tag-done">Fixed</span> — GitHub Actions: tsc, Vitest, cargo, Playwright</td></tr>
+    <tr><td>No E2E suite</td><td><span class="tag-done">Scaffolded</span> — Playwright smoke vs Vite (Tauri deep E2E later)</td></tr>
+    <tr><td>Unclean exit / plaintext vault drift</td><td><span class="tag-done">Hardened</span> — refresh vault; seal on logout/timeout</td></tr>
+    <tr><td>Loyalty group-only (no points)</td><td><span class="tag-new">MVP</span> — balance earn/redeem/reverse</td></tr>
+    <tr><td>Two-stage returns</td><td><span class="tag-done">Shipped</span> (earlier this evening)</td></tr>
+  </table>
+
+  <h3>Remaining gaps</h3>
+  <ul>
+    <li><span class="tag-risk">License HMAC secret</span> still a placeholder — rotate before production keys</li>
+    <li>JSON blob domain model (fine for single PC; limits multi-cashier scale)</li>
+    <li>Windows NSIS only; no code signing / auto-update</li>
+    <li>Runtime DB remains plaintext <em>while a session is open</em> (SQLCipher not adopted)</li>
+    <li>Loyalty: no full append-only ledger / expiry / points reports yet</li>
+    <li>Playwright covers web smoke only — not full desktop WebView2 paths</li>
+  </ul>
+
+  <h2>Security Posture</h2>
+  <table>
+    <tr><th>Control</th><th>Status</th></tr>
+    <tr><td>Vault at rest + DPAPI key</td><td>Strong</td></tr>
+    <tr><td>Unclean-exit vault refresh + logout seal</td><td><span class="tag-done">Hardened</span></td></tr>
+    <tr><td>Argon2id, lockout, session timeout</td><td>Strong</td></tr>
+    <tr><td>UI ↔ Rust RBAC (incl. Manager)</td><td>Aligned</td></tr>
+    <tr><td>License secret in source</td><td><span class="tag-risk">High — rotate before distribution</span></td></tr>
+    <tr><td>No code signing</td><td>Medium (SmartScreen)</td></tr>
+  </table>
+
+  <h2>Testing &amp; Quality Checkup</h2>
+  <p><strong>Run date:</strong> 13 July 2026 (late evening) &nbsp;|&nbsp; <strong>Result:</strong> <span class="pass">ALL PASSED</span></p>
+
+  <h3>Automated test results</h3>
+  <table>
+    <tr><th>Suite</th><th>Command</th><th>Cases</th><th>Result</th></tr>
+    <tr><td>Frontend (Vitest)</td><td>npx vitest run</td><td>26 files · 169 tests</td><td><span class="pass">169 passed</span> · 0 failed</td></tr>
+    <tr><td>Backend (Rust)</td><td>cargo test</td><td>30 tests</td><td><span class="pass">30 passed</span> · 0 failed</td></tr>
+    <tr><td>E2E smoke (Playwright)</td><td>npm run test:e2e</td><td>2 tests</td><td><span class="pass">2 passed</span> · 0 failed</td></tr>
+    <tr><td>TypeScript</td><td>tsc --noEmit</td><td>—</td><td><span class="pass">Clean</span></td></tr>
+  </table>
+
+  <h3>Coverage highlights</h3>
+  <table>
+    <tr><th>Area</th><th>Coverage</th></tr>
+    <tr><td>Rate Master / Offers / cart / quotations</td><td>Strong unit coverage</td></tr>
+    <tr><td>Returns + supplier ledger debit notes</td><td>returns.test.ts + data.test.ts</td></tr>
+    <tr><td>Loyalty earn / redeem / reverse</td><td>loyalty.test.ts</td></tr>
+    <tr><td>Vault unclean-exit refresh</td><td>Rust encryption_key test</td></tr>
+    <tr><td>CI pipeline</td><td>.github/workflows/ci.yml</td></tr>
+    <tr><td>Deep Tauri UI E2E</td><td>Not yet (scaffolding only)</td></tr>
+  </table>
+
+  <h3>Manual smoke checklist (recommended)</h3>
+  <ol>
+    <li>Login → New Sale with customer → confirm loyalty points increase on Customers</li>
+    <li>Redeem points on next sale; balance decreases; invoice discount applied</li>
+    <li>Invoice → Sales Return → Purchase Return (supplier-liable)</li>
+    <li>Logout — confirm vault sealed (no live invora.db until next open)</li>
+    <li>Quotation convert; Manager write; encrypted backup export/restore</li>
+  </ol>
+
+  <h2>Recommended Improvements</h2>
+  <h3>Before wider distribution</h3>
+  <ol>
+    <li>Replace LICENSE_SECRET; remove any hardcoded pack passwords</li>
+    <li>Code-sign the Windows installer</li>
+  </ol>
+  <h3>Medium term</h3>
+  <ol start="3">
+    <li>Expand Playwright to seeded sale/return flows; optional Tauri WebDriver</li>
+    <li>Loyalty append-only ledger + expiry + reports</li>
+    <li>Auto-update channel after signing + update host</li>
+    <li>Relational migration only if multi-cashier concurrency becomes real</li>
+  </ol>
+
+  <h2>Changes Since Prior Review (evening → late evening 13|07)</h2>
+  <table>
+    <tr><th>Item</th><th>Evening</th><th>Now</th></tr>
+    <tr><td>Overall rating</td><td>8.9 / 10</td><td><strong>9.1 / 10</strong></td></tr>
+    <tr><td>CI</td><td>None</td><td><span class="tag-new">GitHub Actions</span></td></tr>
+    <tr><td>E2E</td><td>None</td><td><span class="tag-new">Playwright smoke (2)</span></td></tr>
+    <tr><td>Vault unclean / logout</td><td>Documented risk</td><td><span class="tag-done">Hardened</span></td></tr>
+    <tr><td>Loyalty points</td><td>Group discount only</td><td><span class="tag-new">MVP earn/redeem</span></td></tr>
+    <tr><td>Vitest</td><td>165</td><td><strong>169</strong></td></tr>
+    <tr><td>Rust</td><td>29</td><td><strong>30</strong></td></tr>
+  </table>
+
+  <h2>Use-Case Fit</h2>
+  <table>
+    <tr><th>Scenario</th><th>Fit</th></tr>
+    <tr><td>Owner’s shop, trusted staff, offers/quotes/returns/loyalty</td><td><strong>9.4/10</strong></td></tr>
+    <tr><td>Few clients, supervised rollout (after license rotation)</td><td><strong>8.8/10</strong></td></tr>
+    <tr><td>Public license distribution</td><td><strong>7.2/10</strong> — needs secret rotation + signing</td></tr>
+    <tr><td>Multi-store / enterprise</td><td><strong>4/10</strong> — single-PC JSON model</td></tr>
+  </table>
+
+  <h2>Top Strengths</h2>
+  <ol>
+    <li>Full retail loop — pricing hub → sale → invoice → two-stage returns</li>
+    <li>Hardened persistence — atomic batches + vault seal/refresh + logout seal</li>
+    <li>Automated quality gate — CI with unit + smoke E2E</li>
+    <li>Loyalty MVP wired through sale and return without a separate ledger yet</li>
+    <li>RBAC aligned across UI and Rust</li>
+  </ol>
+
+  <h2>Top 3 Next Steps</h2>
+  <ol>
+    <li><strong>Production license hardening</strong> — rotate secrets</li>
+    <li><strong>Code-sign installer</strong> — reduce SmartScreen friction</li>
+    <li><strong>Expand E2E</strong> — seeded sale / return / loyalty paths</li>
+  </ol>
+
+  <div class="footer">
+    <div>InvoraLite v.1.0.0  | © Baraily Innovations, 2026 | +975 176 06 130</div>
+    <div>Product Quality Review &amp; Testing Checkup · EDP IT Department</div>
+    <div>See also docs/DATABASE_ARCHITECTURE.md and docs/InvoraLite_User_Manual.pdf</div>
+    <div class="date" data-export-date>13|07|2026</div>
+  </div>
+</body>
+</html>

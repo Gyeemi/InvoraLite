@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>InvoraLite User Manual</title>
+  <style>
+    @page { size: A4 portrait; margin: 18mm 16mm; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+      font-size: 11pt;
+      line-height: 1.55;
+      color: #0f172a;
+      background: #fff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .cover {
+      min-height: 240mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      page-break-after: always;
+      border-bottom: 4px solid #16a34a;
+      margin-bottom: 24px;
+      padding: 40px 20px;
+    }
+    .cover-logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #16a34a, #059669);
+      color: #fff;
+      font-size: 28px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .cover h1 {
+      font-size: 32pt;
+      margin: 0 0 8px;
+      color: #0f172a;
+    }
+    .cover .subtitle {
+      font-size: 14pt;
+      color: #64748b;
+      margin: 0 0 24px;
+    }
+    .cover .meta {
+      font-size: 11pt;
+      color: #475569;
+      line-height: 1.8;
+    }
+    .content { padding: 0; }
+    h1 {
+      font-size: 22pt;
+      margin: 28px 0 12px;
+      color: #0f172a;
+      page-break-after: avoid;
+    }
+    h2 {
+      font-size: 15pt;
+      margin: 24px 0 10px;
+      color: #14532d;
+      border-bottom: 2px solid #bbf7d0;
+      padding-bottom: 4px;
+      page-break-after: avoid;
+    }
+    h3 {
+      font-size: 12pt;
+      margin: 18px 0 8px;
+      color: #334155;
+      page-break-after: avoid;
+    }
+    p { margin: 0 0 10px; }
+    ul, ol { margin: 0 0 12px 20px; padding: 0; }
+    li { margin-bottom: 4px; }
+    blockquote {
+      margin: 10px 0 14px;
+      padding: 10px 14px;
+      border-left: 4px solid #f59e0b;
+      background: #fffbeb;
+      color: #92400e;
+      font-size: 10pt;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 16px;
+      font-size: 10pt;
+      page-break-inside: avoid;
+    }
+    table.data-table th,
+    table.data-table td {
+      border: 1px solid #cbd5e1;
+      padding: 7px 9px;
+      vertical-align: top;
+      text-align: left;
+    }
+    table.data-table th {
+      background: #f1f5f9;
+      font-weight: 600;
+      color: #334155;
+    }
+    code {
+      font-family: Consolas, monospace;
+      font-size: 9.5pt;
+      background: #f1f5f9;
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+    hr.section-break {
+      border: 0;
+      border-top: 1px solid #e2e8f0;
+      margin: 20px 0;
+    }
+    .footer-note {
+      margin-top: 32px;
+      padding-top: 12px;
+      border-top: 1px solid #e2e8f0;
+      font-size: 9pt;
+      color: #94a3b8;
+      text-align: center;
+    }
+    @media print {
+      h2 { page-break-before: auto; }
+      .cover { page-break-after: always; }
+    }
+  </style>
+</head>
+<body>
+  <div class="cover">
+    <div class="cover-logo">IL</div>
+    <h1>InvoraLite</h1>
+    <p class="subtitle">User Manual</p>
+    <p class="meta">
+      Version 1.0.0<br />
+      Offline Inventory &amp; Retail Management<br />
+      EDP IT Department
+    </p>
+  </div>
+  <div class="content">
+    <h1>InvoraLite User Manual</h1>
+<p><strong>Version 1.0.0</strong></p>
+<p><strong>Offline Inventory &amp; Retail Management for Windows</strong></p>
+<hr class="section-break" />
+<h2>Table of Contents</h2>
+<ol>
+<li>[Introduction](#1-introduction)</li>
+<li>[Getting Started](#2-getting-started)</li>
+<li>[User Roles &amp; Permissions](#3-user-roles--permissions)</li>
+<li>[Dashboard](#4-dashboard)</li>
+<li>[Products &amp; Inventory](#5-products--inventory)</li>
+<li>[Purchases](#6-purchases)</li>
+<li>[Sales](#7-sales)</li>
+<li>[Customers &amp; Suppliers](#8-customers--suppliers)</li>
+<li>[Invoices](#9-invoices)</li>
+<li>[Sales &amp; Purchase Returns](#10-sales--purchase-returns)</li>
+<li>[Analytics](#11-analytics)</li>
+<li>[Manage (Settings)](#12-manage-settings)</li>
+<li>[Accounting &amp; Tax Reports](#13-accounting--tax-reports)</li>
+<li>[Backup &amp; Restore](#14-backup--restore)</li>
+<li>[Printing &amp; Receipts](#15-printing--receipts)</li>
+<li>[Frequently Asked Questions](#16-frequently-asked-questions)</li>
+</ol>
+<hr class="section-break" />
+<h2>1. Introduction</h2>
+<p>InvoraLite is a desktop application for retail and inventory businesses. It helps you manage stock, record sales and purchases, track customer credit, print invoices and receipts, and produce accounting reports for GST and tax filing—all <strong>offline</strong> on your Windows PC.</p>
+<h3>Key benefits</h3>
+<ul>
+<li><strong>Works offline</strong> — no internet required for daily operations</li>
+<li><strong>Single system</strong> — inventory, sales, people, and basic accounting in one place</li>
+<li><strong>Secure local storage</strong> — encrypted SQLite vault on disk; data protected when the app is closed</li>
+<li><strong>Role-based access</strong> — Admin, Store Keeper, Cashier, and Viewer roles with UI tailored to each role</li>
+<li><strong>Print-ready documents</strong> — invoices, sale receipts, payment receipts, tax reports</li>
+</ul>
+<h3>System requirements</h3>
+<ul>
+<li>Windows 10 or 11 (64-bit)</li>
+<li>Microsoft WebView2 (included on most Windows 11 PCs)</li>
+<li>Screen resolution 1280×720 or higher recommended</li>
+</ul>
+<hr class="section-break" />
+<h2>2. Getting Started</h2>
+<h3>2.1 Installation</h3>
+<ol>
+<li>Run the installer: <code>InvoraLite v.1.0.0 DD-MM-YYYY x64-setup.exe</code> (date varies by build)</li>
+<li>Follow the setup wizard</li>
+<li>Launch <strong>InvoraLite</strong> from the Start menu or desktop shortcut</li>
+</ol>
+<h3>2.2 License activation</h3>
+<p>On first launch, InvoraLite shows the <strong>License</strong> screen.</p>
+<table class="data-table"><thead><tr>
+<th>Option</th>
+<th>Description</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Start 60-day trial</strong></td>
+<td>Free trial bound to this computer</td>
+</tr>
+<tr>
+<td><strong>Activate license</strong></td>
+<td>Enter your <code>INVORA-</code> license key or import an activation file</td>
+</tr>
+</tbody></table>
+<p>Contact your InvoraLite provider if you need a license key.</p>
+<h3>2.3 Business setup (first time only)</h3>
+<p>After licensing, complete <strong>Business Setup</strong>:</p>
+<ol>
+<li><strong>Business name</strong>, address, phone, email</li>
+<li><strong>Licence number</strong> and <strong>TPN</strong> (Tax Payer Number)</li>
+<li><strong>GST registration</strong> — enable if your business is GST-registered</li>
+<li><strong>Owner account</strong> — username and password for Admin login</li>
+</ol>
+<p>Click <strong>Complete Setup</strong> to finish.</p>
+<h3>2.4 Sign in</h3>
+<ol>
+<li>Enter your <strong>username</strong> and <strong>password</strong></li>
+<li>Click <strong>Sign In</strong></li>
+</ol>
+<p>The session automatically logs out after <strong>30 minutes</strong> of inactivity.</p>
+<hr class="section-break" />
+<h2>3. User Roles &amp; Permissions</h2>
+<p>InvoraLite shows a <strong>role banner</strong> after login explaining what your account can do. Buttons, tabs, and forms you cannot use are hidden or disabled.</p>
+<table class="data-table"><thead><tr>
+<th>Role</th>
+<th>Typical user</th>
+<th>Can do</th>
+<th>Cannot do</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Admin</strong></td>
+<td>Owner</td>
+<td>Everything: settings, staff, accounting, encrypted backup, delete records</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Manager</strong></td>
+<td>Shop manager</td>
+<td>Products, purchases, sales, returns, staff/office/audit, delete</td>
+<td>Business profile edit, tax report packs (Admin)</td>
+</tr>
+<tr>
+<td><strong>Store Keeper</strong></td>
+<td>Inventory staff</td>
+<td>Products, purchases, purchase returns, stock adjustments, sales, customers, suppliers</td>
+<td>Admin settings, delete records, backup</td>
+</tr>
+<tr>
+<td><strong>Cashier</strong></td>
+<td>Front desk</td>
+<td>Sales, sales returns, customers, customer payments</td>
+<td>Purchases, suppliers, admin settings</td>
+</tr>
+<tr>
+<td><strong>Viewer</strong></td>
+<td>Auditor, trainee</td>
+<td>View dashboard, products, sales, invoices, customers, suppliers</td>
+<td>Any save, edit, delete, or print that changes data</td>
+</tr>
+</tbody></table>
+<h3>What each role sees</h3>
+<table class="data-table"><thead><tr>
+<th>Area</th>
+<th>Admin</th>
+<th>Manager</th>
+<th>Store Keeper</th>
+<th>Cashier</th>
+<th>Viewer</th>
+</tr></thead><tbody>
+<tr>
+<td>Dashboard — New Sale</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>Hidden</td>
+</tr>
+<tr>
+<td>Products — Inventory</td>
+<td>Full</td>
+<td>Full</td>
+<td>Full</td>
+<td>View only</td>
+<td>View only</td>
+</tr>
+<tr>
+<td>Products — Stock Adjustments</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>Hidden</td>
+<td>Hidden</td>
+</tr>
+<tr>
+<td>Invoice — Sales Return</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>Hidden</td>
+</tr>
+<tr>
+<td>Purchase / Purchase Return</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>Hidden</td>
+<td>Hidden</td>
+</tr>
+<tr>
+<td>Customers tab</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>View only</td>
+</tr>
+<tr>
+<td>Suppliers tab</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>Hidden</td>
+<td>View only</td>
+</tr>
+<tr>
+<td>Manage — Business</td>
+<td>Edit</td>
+<td>View</td>
+<td>View</td>
+<td>View</td>
+<td>View</td>
+</tr>
+<tr>
+<td>Manage — Staff, Office, Audit</td>
+<td>✓</td>
+<td>✓</td>
+<td>Limited</td>
+<td>Hidden</td>
+<td>Hidden</td>
+</tr>
+<tr>
+<td>Profile — Backup / Restore</td>
+<td>✓</td>
+<td>Hidden</td>
+<td>Hidden</td>
+<td>Hidden</td>
+<td>Hidden</td>
+</tr>
+</tbody></table>
+<blockquote><strong>Tip:</strong> Sensitive actions (void sale, delete records, restore backup) require your <strong>password confirmation</strong>.</blockquote>
+<p>Staff accounts are managed under <strong>Manage → Manage Roles</strong> (Admin only).</p>
+<hr class="section-break" />
+<h2>4. Dashboard</h2>
+<p>The <strong>Dashboard</strong> is your home screen after login.</p>
+<h3>What you see</h3>
+<ul>
+<li><strong>Today's sales</strong> and revenue summary</li>
+<li><strong>Sales chart</strong> — recent performance trend</li>
+<li><strong>Low-stock alerts</strong> — products at or below alert level</li>
+<li><strong>Quick actions</strong> — <strong>New Sale</strong> button (shown only if your role can record sales)</li>
+</ul>
+<p>Use the sidebar to navigate to other modules.</p>
+<hr class="section-break" />
+<h2>5. Products &amp; Inventory</h2>
+<p>Open <strong>Products</strong> from the sidebar.</p>
+<p>Use the tabs at the top: <strong>Inventory</strong>, <strong>Stock Adjustments</strong> (Admin / Store Keeper only), and <strong>Sale Returns</strong>.</p>
+<h3>5.1 Inventory tab</h3>
+<p>Manage your product catalogue:</p>
+<ul>
+<li><strong>Add product</strong> — name, category, SKU, price, cost, stock, optional IMEI/specification</li>
+<li><strong>Edit</strong> — update details or pricing</li>
+<li><strong>Delete</strong> — Admin only; requires password</li>
+<li><strong>Low stock alert</strong> — set a per-product threshold; alerts appear on Dashboard and Products</li>
+<li><strong>Import / Export CSV</strong> — bulk product data (Admin / Store Keeper only)</li>
+</ul>
+<p>If you have <strong>View only</strong> access, you can browse the catalogue but cannot add, edit, or delete products.</p>
+<p>The inventory table shows stock level, status (In stock / Low / Out), and selling price.</p>
+<h3>5.2 Stock Adjustments tab</h3>
+<p>*Available to Admin and Store Keeper only.*</p>
+<p>Record stock changes that are not from sales or purchases:</p>
+<table class="data-table"><thead><tr>
+<th>Reason</th>
+<th>Use when</th>
+</tr></thead><tbody>
+<tr>
+<td>Stocktake</td>
+<td>Physical count differs from system</td>
+</tr>
+<tr>
+<td>Damage</td>
+<td>Items damaged or written off</td>
+</tr>
+<tr>
+<td>Theft</td>
+<td>Stock lost or stolen</td>
+</tr>
+</tbody></table>
+<p>Enter quantity change (+ or −), reason, and optional notes. Stock updates immediately and an audit entry is recorded.</p>
+<h3>5.3 Sale Returns tab (voided sales)</h3>
+<p>View <strong>voided / cancelled sales</strong> from Products. Voiding a sale:</p>
+<ul>
+<li>Restores product stock</li>
+<li>Reverses customer credit (if applicable)</li>
+<li>Marks the sale as cancelled</li>
+</ul>
+<p>Void from the <strong>Invoice</strong> page (password required). This is different from a <strong>Sales Return</strong> (customer goods return) — see [§10](#10-sales--purchase-returns).</p>
+<hr class="section-break" />
+<h2>6. Purchases</h2>
+<p>Open <strong>Purchase</strong> from the sidebar (Admin, Manager, and Store Keeper). Cashiers and Viewers do not see this menu item.</p>
+<p>If you open Purchase without permission, InvoraLite shows an <strong>Access Restricted</strong> message.</p>
+<h3>Recording a purchase</h3>
+<ol>
+<li>Click <strong>New Purchase</strong></li>
+<li>Enter <strong>invoice number</strong>, <strong>supplier</strong>, and <strong>purchase date</strong></li>
+<li>Add line items — product name, quantity, cost, GST %, selling price (Rate Master items pull rates automatically)</li>
+<li>Add <strong>shipping charge</strong> if applicable</li>
+<li>Click <strong>Save Purchase</strong></li>
+</ol>
+<p>When saved as received and stocked, inventory quantities increase automatically. The purchase also appears in <strong>Purchase History</strong> (click a row for a read-only detail view).</p>
+<h3>Supplier returns queue</h3>
+<p>If a customer return was marked <strong>supplier-liable</strong>, it appears at the top of Purchase as <strong>Supplier returns queue</strong>. Use <strong>Create purchase return</strong> to send goods back to the supplier (Stage 2). See [§10.2](#102-stage-2--purchase-return).</p>
+<h3>Supplier linkage</h3>
+<p>Link purchases to suppliers from <strong>Customers → Suppliers</strong> for accurate payable tracking.</p>
+<hr class="section-break" />
+<h2>7. Sales</h2>
+<p>Start a sale from:</p>
+<ul>
+<li><strong>Dashboard</strong> → New Sale</li>
+<li><strong>Products</strong> page quick action</li>
+</ul>
+<h3>7.1 New Sale modal</h3>
+<ol>
+<li><strong>Select customer</strong> — choose existing customer or Walk-in</li>
+<li><strong>Add products</strong> — search and add items; enter IMEI for phones if needed</li>
+<li><strong>Apply offers / discount</strong> (optional) — coupons, bill offers, payment offers, etc.</li>
+<li><strong>Payment method:</strong></li>
+</ol>
+<table class="data-table"><thead><tr>
+<th>Method</th>
+<th>Description</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Cash</strong></td>
+<td>Full payment at sale</td>
+</tr>
+<tr>
+<td><strong>E-Payment</strong></td>
+<td>Bank transfer, mBoB, etc. — enter reference</td>
+</tr>
+<tr>
+<td><strong>Credit</strong></td>
+<td>Customer pays later — full amount on credit</td>
+</tr>
+<tr>
+<td><strong>Credit + partial</strong></td>
+<td>Part paid now, remainder on credit</td>
+</tr>
+</tbody></table>
+<ol>
+<li>Complete the sale:</li>
+</ol>
+<table class="data-table"><thead><tr>
+<th>Button</th>
+<th>Action</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Complete Sale</strong></td>
+<td>Saves sale only</td>
+</tr>
+<tr>
+<td><strong>Complete Sale &amp; Print Receipt</strong></td>
+<td>Saves and opens receipt preview (80mm thermal format)</td>
+</tr>
+</tbody></table>
+<p>Stock is reduced automatically when the sale completes.</p>
+<h3>7.2 Loyalty points</h3>
+<p>Named customers can earn and redeem <strong>loyalty points</strong>:</p>
+<ul>
+<li><strong>Earn</strong> — on each completed sale (default 1 point per Nu 1.00 of total; configurable on a <strong>LOYALTY</strong> offer as “points per 100 Nu”)</li>
+<li><strong>Redeem</strong> — on New Sale, when the customer has a balance, enter points to redeem (default Nu 1 per point; configurable on the LOYALTY offer)</li>
+<li><strong>Returns</strong> — a sales return reverses a proportional share of points earned on that sale</li>
+</ul>
+<p>Walk-in sales do not earn or redeem points. Balance is shown on <strong>Customers</strong>.</p>
+<hr class="section-break" />
+<h2>8. Customers &amp; Suppliers</h2>
+<p>Open <strong>Customers</strong> from the sidebar.</p>
+<p><strong>Cashiers</strong> see the <strong>Customers</strong> tab only. <strong>Viewers</strong> can browse both tabs but cannot edit or record payments.</p>
+<h3>8.1 Customers tab</h3>
+<ul>
+<li>Add customers with name, phone, address</li>
+<li>View <strong>credit due</strong> — amount owed by the customer</li>
+<li>View <strong>loyalty points</strong> balance when greater than zero</li>
+<li><strong>Mark Paid</strong> — record payment against credit balance</li>
+<li>View <strong>payment history</strong> and reprint receipts</li>
+</ul>
+<p><strong>Mark Paid</strong> options:</p>
+<ul>
+<li><strong>Save Payment</strong> — records payment</li>
+<li><strong>Save Payment &amp; Print Payment Receipt</strong> — records and opens A5 landscape receipt preview</li>
+</ul>
+<p>Sales returns settled as <strong>credit</strong> reduce customer AR first, then add any remainder as store credit.</p>
+<h3>8.2 Suppliers tab</h3>
+<p>*Hidden from Cashier role.*</p>
+<ul>
+<li>Add suppliers with optional <strong>opening balance</strong> (credit or advance)</li>
+<li>Record <strong>supplier payments</strong></li>
+<li>Track balance due and advance remaining</li>
+<li>View <strong>payment history</strong> — purchases, payments, advances, and <strong>purchase returns</strong> (debit notes)</li>
+</ul>
+<hr class="section-break" />
+<h2>9. Invoices</h2>
+<p>Open <strong>Invoice</strong> from the sidebar.</p>
+<h3>Layout</h3>
+<ul>
+<li><strong>Left panel</strong> — Sales Record list (fixed width); select a sale</li>
+<li><strong>Right panel</strong> — Tax invoice preview (shows prior returns on this sale when present)</li>
+</ul>
+<h3>Actions</h3>
+<table class="data-table"><thead><tr>
+<th>Action</th>
+<th>Description</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Sales Return</strong></td>
+<td>Customer goods return — stock in + settlement (see §10.1)</td>
+</tr>
+<tr>
+<td><strong>Print Invoice</strong></td>
+<td>Print GST tax invoice for selected sale</td>
+</tr>
+<tr>
+<td><strong>Void Sale</strong></td>
+<td>Cancel entire sale, restore stock, reverse credit (password required)</td>
+</tr>
+</tbody></table>
+<p>Credit sales show payment status including settlements and outstanding balance.</p>
+<hr class="section-break" />
+<h2>10. Sales &amp; Purchase Returns</h2>
+<p>InvoraLite uses a <strong>two-stage</strong> returns model. <strong>Products</strong> remain the stock source of truth. Original sales and purchases are <strong>not</strong> rewritten — returns are separate linked documents.</p>
+<h3>10.1 Stage 1 — Sales Return (customer)</h3>
+<ol>
+<li>Open <strong>Invoice</strong> and select the sale</li>
+<li>Click <strong>Sales Return</strong></li>
+<li>Tick the lines to return and enter quantities (capped by what is still returnable)</li>
+<li>Choose <strong>reason</strong> (warranty, complaint, damage, other)</li>
+<li>Choose <strong>customer settlement</strong>:</li>
+</ol>
+<p>   - <strong>Refund</strong> — cash/e-pay refund outside the AR ledger (no automatic balance change)</p>
+<p>   - <strong>Store credit / AR adjust</strong> — reduces customer credit due; excess becomes store credit</p>
+<p>   - <strong>Replacement</strong> — goods swapped; no AR change</p>
+<ol>
+<li>Optionally tick <strong>Supplier-liable</strong> if you will return the item to the supplier next</li>
+<li>Confirm — stock increases in Products and the return appears on the invoice preview</li>
+</ol>
+<h3>10.2 Stage 2 — Purchase Return (supplier)</h3>
+<p>Only for sales returns marked <strong>supplier-liable</strong> that are not yet sent:</p>
+<ol>
+<li>Open <strong>Purchase</strong></li>
+<li>In <strong>Supplier returns queue</strong>, click <strong>Create purchase return</strong></li>
+<li>Select/enter the <strong>supplier</strong>, confirm <strong>debit note / ref</strong> and date</li>
+<li>Confirm — stock decreases, supplier payable is reduced, and supplier payment history shows a <strong>Return</strong> row</li>
+</ol>
+<p>The sales return status becomes <strong>sent to supplier</strong> and links to the purchase return ID.</p>
+<blockquote><strong>Tip:</strong> Use Stage 1 alone for customer-only returns (wrong size, change of mind). Use Stage 1 + Stage 2 for warranty / supplier-fault goods.</blockquote>
+<hr class="section-break" />
+<h2>11. Analytics</h2>
+<p>Open <strong>Analytics</strong> from the sidebar.</p>
+<p>View earnings charts:</p>
+<ul>
+<li><strong>Weekly</strong></li>
+<li><strong>Monthly</strong></li>
+<li><strong>Yearly</strong></li>
+</ul>
+<p>Useful for tracking business performance over time.</p>
+<hr class="section-break" />
+<h2>12. Manage (Settings)</h2>
+<p>Open <strong>Manage</strong> from the bottom of the sidebar.</p>
+<p>Non-Admin users can open Manage to <strong>view</strong> business details only. Admin-only tabs are not shown to other roles.</p>
+<h3>11.1 Business Profile</h3>
+<p><strong>Admin</strong> can edit business name, address, TPN, GST registration, and owner password.</p>
+<p>Other roles see the same fields <strong>read-only</strong> (fields are disabled).</p>
+<h3>11.2 Manage Roles (Admin)</h3>
+<p>Add, edit, or remove staff accounts and assign roles (Store Keeper, Cashier, or Viewer).</p>
+<h3>11.3 Office (Admin)</h3>
+<p>Track <strong>office expenses</strong> and <strong>fixed assets</strong>:</p>
+<ul>
+<li>Expenses by category (utilities, payroll, marketing, etc.)</li>
+<li>Asset register with depreciation support</li>
+<li>Print expense reports by period</li>
+</ul>
+<h3>11.4 Reports (Admin)</h3>
+<p>See [Section 12](#12-accounting--tax-reports).</p>
+<h3>11.5 Audit Log (Admin)</h3>
+<p>Browse system audit trail — logins, stock changes, sale voids, and other recorded actions. Use <strong>Refresh</strong> to update the list.</p>
+<h3>11.6 Backup (Admin — header menu)</h3>
+<p>Access <strong>Export Encrypted Backup</strong> and <strong>Restore Database</strong> from the profile menu (top-right, Admin only).</p>
+<hr class="section-break" />
+<h2>13. Accounting &amp; Tax Reports</h2>
+<p><strong>Manage → Reports</strong> (Admin only)</p>
+<p>Select an <strong>accounting period</strong> (month) at the top.</p>
+<h3>Tabs</h3>
+<table class="data-table"><thead><tr>
+<th>Tab</th>
+<th>Purpose</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Net Profit Dashboard</strong></td>
+<td>Revenue, COGS, gross profit, net profit KPIs and trend</td>
+</tr>
+<tr>
+<td><strong>P&amp;L Report</strong></td>
+<td>Full Profit &amp; Loss statement for the period</td>
+</tr>
+<tr>
+<td><strong>Chart of Accounts</strong></td>
+<td>Standard account codes used by the system</td>
+</tr>
+<tr>
+<td><strong>Journal Entries</strong></td>
+<td>Auto-generated entries from sales, purchases, expenses + manual adjustments</td>
+</tr>
+<tr>
+<td><strong>Monthly Closing</strong></td>
+<td>Close the month and view closing history</td>
+</tr>
+</tbody></table>
+<h3>Manual journal entry</h3>
+<p>For adjustments not captured in daily operations:</p>
+<ol>
+<li>Go to <strong>Journal Entries</strong></li>
+<li>Enter description, <strong>debit account</strong>, <strong>credit account</strong>, and amount</li>
+<li>Click <strong>Post Entry</strong></li>
+</ol>
+<p>Debits and credits always balance automatically.</p>
+<h3>Tax submission report</h3>
+<p>Print a detailed report for GST and tax filing:</p>
+<ul>
+<li><strong>Monthly Closing</strong> → <strong>Print Tax Submission Report</strong></li>
+<li><strong>P&amp;L Report</strong> → <strong>Print Tax Report</strong></li>
+<li><strong>Closing history</strong> → <strong>Print</strong> on any closed period</li>
+</ul>
+<p>The report includes:</p>
+<ul>
+<li>Business details (TPN, GST registration, licence)</li>
+<li>Profit &amp; Loss statement</li>
+<li>GST output, input, and net payable</li>
+<li>Sales register and purchase register</li>
+<li>Operating expenses by category</li>
+<li>Declaration and signature lines</li>
+</ul>
+<blockquote><strong>Note:</strong> GST figures are estimated from your records. Review with your accountant before official submission.</blockquote>
+<h3>Monthly close</h3>
+<ol>
+<li>Review P&amp;L and journal entries for the period</li>
+<li>Go to <strong>Monthly Closing</strong></li>
+<li>Click <strong>Close Month</strong></li>
+</ol>
+<p>Once closed, no new manual journal entries can be added for that period.</p>
+<hr class="section-break" />
+<h2>14. Backup &amp; Restore</h2>
+<p>InvoraLite protects your data in two ways:</p>
+<ol>
+<li><strong>Database encryption at rest</strong> — while the app is closed, your database is stored as an encrypted vault file</li>
+<li><strong>Encrypted manual backups</strong> — portable ZIP exports protected by a backup password you choose</li>
+</ol>
+<h3>Export encrypted backup (Admin)</h3>
+<ol>
+<li>Click your <strong>profile</strong> (top-right)</li>
+<li>Select <strong>Export Encrypted Backup</strong></li>
+<li>Enter a <strong>backup password</strong> (and confirm it) — store this password safely; it cannot be recovered if lost</li>
+<li>Choose where to save the ZIP file</li>
+</ol>
+<p>The backup contains your full encrypted database vault. You will need the <strong>backup password</strong> to restore this file on any computer.</p>
+<h3>Restore backup (Admin)</h3>
+<ol>
+<li>Profile menu → <strong>Restore Database</strong></li>
+<li>Enter your <strong>login password</strong> to confirm</li>
+<li>Select a backup ZIP file</li>
+<li>If the backup is password-protected, enter the <strong>backup password</strong> when prompted</li>
+<li>The app restarts with restored data</li>
+</ol>
+<p>Older plain (unencrypted) backups from earlier versions can still be restored.</p>
+<blockquote><strong>Warning:</strong> Restore replaces all current data on this computer.</blockquote>
+<h3>Automatic backups</h3>
+<p>InvoraLite also keeps <strong>automatic startup backups</strong> (last 10) in the application data folder. These use machine-level encryption and can only be restored on the <strong>same Windows user account</strong> on the same PC.</p>
+<h3>Data location</h3>
+<p>Application data folder: <code>%LOCALAPPDATA%\InvoraLite\</code></p>
+<table class="data-table"><thead><tr>
+<th>File</th>
+<th>Description</th>
+</tr></thead><tbody>
+<tr>
+<td><code>invora.db</code></td>
+<td>Live database while the app is running</td>
+</tr>
+<tr>
+<td><code>invora.db.vault</code></td>
+<td>Encrypted database when the app is closed</td>
+</tr>
+<tr>
+<td><code>.dbkey</code></td>
+<td>Encryption key (protected by Windows)</td>
+</tr>
+<tr>
+<td><code>backups\</code></td>
+<td>Automatic startup backup ZIP files</td>
+</tr>
+</tbody></table>
+<hr class="section-break" />
+<h2>15. Printing &amp; Receipts</h2>
+<table class="data-table"><thead><tr>
+<th>Document</th>
+<th>Format</th>
+<th>How to print</th>
+</tr></thead><tbody>
+<tr>
+<td>Sale receipt</td>
+<td>80mm thermal</td>
+<td>Complete Sale &amp; Print Receipt</td>
+</tr>
+<tr>
+<td>Tax invoice</td>
+<td>Standard A4</td>
+<td>Invoice → Print Invoice</td>
+</tr>
+<tr>
+<td>Customer payment receipt</td>
+<td>A5 landscape</td>
+<td>Save Payment &amp; Print Payment Receipt</td>
+</tr>
+<tr>
+<td>Tax submission report</td>
+<td>A4 portrait</td>
+<td>Manage → Reports → Print Tax Report</td>
+</tr>
+<tr>
+<td>Expense report</td>
+<td>Standard</td>
+<td>Manage → Office → Print</td>
+</tr>
+</tbody></table>
+<p>Use your system's print dialog to select the correct printer and paper size.</p>
+<hr class="section-break" />
+<h2>16. Frequently Asked Questions</h2>
+<h3>Does InvoraLite need internet?</h3>
+<p>No. Daily operations work fully offline. Internet is only needed for license activation if required by your provider.</p>
+<h3>Can multiple users use it at once?</h3>
+<p>InvoraLite is designed for <strong>single-store, single-computer</strong> use. For multiple tills, install on each PC or use one shared workstation.</p>
+<h3>What if I forget my password?</h3>
+<p>An Admin can reset staff passwords under <strong>Manage → Manage Roles</strong>. For the owner account, contact your InvoraLite support provider.</p>
+<h3>Is my data encrypted?</h3>
+<p>Yes. When you <strong>close</strong> InvoraLite or <strong>log out</strong>, the database is sealed into an encrypted vault file. If the app was force-closed, the next launch refreshes the vault from the latest data before continuing. Manual backups you export are also password-encrypted. Keep your backup password in a safe place.</p>
+<h3>What happens if I lose my backup password?</h3>
+<p>Encrypted manual backups cannot be restored without the backup password. Automatic machine backups on the same PC may still be available in the backups folder.</p>
+<h3>How do loyalty points work?</h3>
+<p>Named customers earn points on completed sales and can redeem them as a discount on New Sale. Configure earn/redeem rates under <strong>Pricing → Offers</strong> with offer type <strong>Loyalty</strong>. Sales returns reverse a share of points earned on that sale.</p>
+<h3>How do sales returns differ from voiding a sale?</h3>
+<p><strong>Void</strong> cancels the entire sale (password required) and restores all stock. <strong>Sales Return</strong> is for goods brought back by the customer — you choose lines and quantities, settle the customer, and optionally send supplier-liable items onward as a purchase return. The original sale stays on record.</p>
+<h3>How is customer credit tracked?</h3>
+<p>Credit sales add to the customer's balance. Payments recorded via <strong>Mark Paid</strong> reduce the balance. Payments apply to oldest credit invoices first (FIFO).</p>
+<h3>Can I change data after month-end?</h3>
+<p>Closed accounting periods block new manual journal entries. Operational data (sales, purchases) should be corrected before closing, or adjusted via manual journal entries before close.</p>
+<h3>Who do I contact for support?</h3>
+<p>Contact <strong>EDP IT Department</strong> or your InvoraLite license provider for activation, training, and technical support.</p>
+<hr class="section-break" />
+<h2>Document Information</h2>
+<table class="data-table"><thead><tr>
+<th>Field</th>
+<th>Value</th>
+</tr></thead><tbody>
+<tr>
+<td>Product</td>
+<td>InvoraLite</td>
+</tr>
+<tr>
+<td>Version</td>
+<td>1.0.0</td>
+</tr>
+<tr>
+<td>Manual date</td>
+<td>13 July 2026</td>
+</tr>
+<tr>
+<td>Platform</td>
+<td>Windows (Tauri desktop)</td>
+</tr>
+<tr>
+<td>Currency</td>
+<td>Nu. (Bhutanese Ngultrum)</td>
+</tr>
+</tbody></table>
+<p>*This manual describes InvoraLite v1.0.0. Features may be updated in future releases.*</p>
+<hr class="section-break" />
+<p><strong>© InvoraLite — EDP IT Department</strong></p>
+    <p class="footer-note">InvoraLite User Manual v1.0.0 — Generated for offline retail and inventory management on Windows.</p>
+  </div>
+</body>
+</html>

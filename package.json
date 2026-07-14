@@ -1,0 +1,51 @@
+{
+  "name": "invora",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Invora - offline inventory management with local SQLite storage",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/tauri-dev.ps1",
+    "tauri:build": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/tauri-build.ps1",
+    "tauri:icon": "tauri icon public/icon.svg -o src-tauri/icons",
+    "license:pack": "node license/pack-license.cjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "manual:pdf": "node scripts/generate-user-manual-pdf.mjs",
+    "review:pdf": "node scripts/generate-doc-pdf.mjs product-review",
+    "docs:pdf": "node scripts/generate-user-manual-pdf.mjs && node scripts/generate-doc-pdf.mjs product-review"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-opener": "^2",
+    "lucide-react": "^0.511.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "recharts": "^2.15.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@tailwindcss/vite": "^4.1.8",
+    "@tauri-apps/cli": "^2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.5.2",
+    "archiver": "^7.0.1",
+    "archiver-zip-encrypted": "^2.0.0",
+    "jsdom": "^29.1.1",
+    "tailwindcss": "^4.1.8",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.3",
+    "vitest": "^3.2.4"
+  }
+}

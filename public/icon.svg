@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <filter id="neon-glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <linearGradient id="neon-top" x1="16" y1="12" x2="48" y2="32" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00F5FF" />
+      <stop offset="0.5" stop-color="#4D7CFE" />
+      <stop offset="1" stop-color="#A855F7" />
+    </linearGradient>
+    <linearGradient id="neon-left" x1="16" y1="22" x2="32" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF2BD6" />
+      <stop offset="1" stop-color="#FF6B2B" />
+    </linearGradient>
+    <linearGradient id="neon-right" x1="32" y1="22" x2="48" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#39FF14" />
+      <stop offset="1" stop-color="#00F5FF" />
+    </linearGradient>
+    <linearGradient id="neon-core" x1="22" y1="18" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4D7CFE" />
+      <stop offset="0.45" stop-color="#A855F7" />
+      <stop offset="1" stop-color="#22C55E" />
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="14" fill="#0A0E14" />
+  <rect width="64" height="64" rx="14" fill="url(#neon-top)" opacity="0.08" />
+
+  <path
+    d="M32 11L49 21.5V42.5L32 53L15 42.5V21.5L32 11Z"
+    stroke="#00F5FF"
+    stroke-width="0.75"
+    opacity="0.35"
+    filter="url(#neon-glow)"
+  />
+
+  <path d="M15 21.5L32 31.5V53L15 42.5V21.5Z" fill="url(#neon-left)" filter="url(#neon-glow)" />
+  <path d="M32 31.5L49 21.5V42.5L32 53V31.5Z" fill="url(#neon-right)" filter="url(#neon-glow)" />
+  <path d="M15 21.5L32 11L49 21.5L32 31.5L15 21.5Z" fill="url(#neon-top)" filter="url(#neon-glow)" />
+
+  <path
+    d="M32 17.5L41.5 23.5V36.5L32 42.5L22.5 36.5V23.5L32 17.5Z"
+    fill="url(#neon-core)"
+    opacity="0.92"
+  />
+
+  <path d="M32 27.5V42.5" stroke="#F8FAFC" stroke-width="2.25" stroke-linecap="round" opacity="0.95" />
+  <path
+    d="M26.5 21.5L32 17.5L37.5 21.5"
+    stroke="#00F5FF"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    filter="url(#neon-glow)"
+  />
+  <path
+    d="M22.5 23.5L32 29.5L41.5 23.5"
+    stroke="#FF2BD6"
+    stroke-width="1.25"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    opacity="0.85"
+  />
+</svg>
