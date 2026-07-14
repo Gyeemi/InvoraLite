@@ -40,7 +40,29 @@ The installer is produced at:
 
 ## License keys
 
-License verification uses the same `INVORA-` format as the reference app. Update `LICENSE_SECRET` in `src-tauri/src/license.rs` before distributing production licenses.
+See **[docs/LICENSE_ISSUANCE.md](docs/LICENSE_ISSUANCE.md)** for issuing real device-bound licences.
+
+Production builds should set compile-time secrets (never commit them):
+
+```powershell
+$env:INVORA_LICENSE_SECRET = "<long-random-secret>"
+$env:INVORA_LICENSE_ZIP_PASSWORD = "<strong-zip-password>"
+npm run tauri:build
+```
+
+Pack a customer ZIP (same ZIP password as the build):
+
+```powershell
+npm run license:pack -- "<DEVICE-ID>" "customer@email.com" "18 Months"
+```
+
+Or issue an `INVORA-` HMAC key (same signing secret as the build):
+
+```powershell
+npm run license:issue-key -- "<DEVICE-ID>" "18 Months" "Customer Name"
+```
+
+Dev builds without those env vars use placeholder secrets suitable only for local testing.
 
 ## Data location
 

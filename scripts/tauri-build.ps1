@@ -1,3 +1,22 @@
+$root = Resolve-Path (Join-Path $PSScriptRoot '..')
+$licenseEnv = Join-Path $root 'license\.env.local'
+if (Test-Path $licenseEnv) {
+    Write-Host 'Loading licence secrets from license\.env.local'
+    Get-Content $licenseEnv | ForEach-Object {
+        $line = $_.Trim()
+        if (-not $line -or $line.StartsWith('#')) { return }
+        $parts = $line.Split('=', 2)
+        if ($parts.Length -ne 2) { return }
+        $name = $parts[0].Trim()
+        $value = $parts[1].Trim().Trim('"').Trim("'")
+        if ($name -and $value) {
+            Set-Item -Path "Env:$name" -Value $value
+        }
+    }
+} else {
+    Write-Warning 'license\.env.local not found - using dev licence placeholders. See docs\LICENSE_ISSUANCE.md'
+}
+
 & (Join-Path $PSScriptRoot 'with-msvc.ps1') 'powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/generate-installer-brand.ps1'
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
@@ -42,36 +61,37 @@ if ($exitCode -eq 0) {
         if (Test-Path $iconSource) {
             Copy-Item $iconSource $iconPng -Force
         } else {
-            Write-Warning "Installer logo PNG not found (run npm run tauri:icon from public/icon.svg)."
+            Write-Warning 'Installer logo PNG not found (run npm run tauri:icon from public/icon.svg).'
             $exitCode = 1
         }
 
         if ($exitCode -eq 0) {
-        & (Join-Path $PSScriptRoot 'with-msvc.ps1') "cd /d `"$shellDir`" && cargo build --release"
+            # Build installer-shell from repo root via with-msvc
+            & (Join-Path $PSScriptRoot 'with-msvc.ps1') 'cargo build --release --manifest-path installer-shell/Cargo.toml'
 
-        $shellExit = $LASTEXITCODE
+            $shellExit = $LASTEXITCODE
 
-        if ($shellExit -ne 0) {
-            Write-Warning "HTML installer shell build failed."
-            $exitCode = $shellExit
-        } else {
-            $shellExe = Join-Path $shellDir 'target\release\invora-installer.exe'
-            $installerFileName = "${productName} v.${version} ${exportDate} x64-setup.exe"
-            $exportCopy = Join-Path $exportsDir $installerFileName
-            $bundleCopy = Join-Path $bundleDir $installerFileName
+            if ($shellExit -ne 0) {
+                Write-Warning 'HTML installer shell build failed.'
+                $exitCode = $shellExit
+            } else {
+                $shellExe = Join-Path $shellDir 'target\release\invora-installer.exe'
+                $installerFileName = "${productName} v.${version} ${exportDate} x64-setup.exe"
+                $exportCopy = Join-Path $exportsDir $installerFileName
+                $bundleCopy = Join-Path $bundleDir $installerFileName
 
-            New-Item -ItemType Directory -Force -Path $exportsDir | Out-Null
-            Copy-Item $shellExe $exportCopy -Force
-            Copy-Item $shellExe $bundleCopy -Force
+                New-Item -ItemType Directory -Force -Path $exportsDir | Out-Null
+                Copy-Item $shellExe $exportCopy -Force
+                Copy-Item $shellExe $bundleCopy -Force
 
-            Write-Host ""
-            Write-Host "InvoraLite desktop installer exported successfully."
-            Write-Host "  Version:      v.$version"
-            Write-Host "  Exported:     $displayDate"
-            Write-Host "  UI:           HTML WebView2 (design mockup)"
-            Write-Host "  Bundle:       $bundleCopy"
-            Write-Host "  Export copy:  $exportCopy"
-        }
+                Write-Host ''
+                Write-Host 'InvoraLite desktop installer exported successfully.'
+                Write-Host "  Version:      v.$version"
+                Write-Host "  Exported:     $displayDate"
+                Write-Host '  UI:           HTML WebView2 (design mockup)'
+                Write-Host "  Bundle:       $bundleCopy"
+                Write-Host "  Export copy:  $exportCopy"
+            }
         }
     }
 }

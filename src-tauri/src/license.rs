@@ -18,12 +18,27 @@ const TRIAL_MIGRATION_V60_KEY: &str = "invora_trial_migrated_v60";
 const TRIAL_DAYS: i64 = 60;
 const LEGACY_TRIAL_DAYS: i64 = 14;
 const PREFIX: &str = "INVORA";
-const LICENSE_ZIP_PASSWORD: &str = "InvoraLite@2026";
 const PRODUCT_NAME: &str = "InvoraLite";
 const BUSINESS_STORAGE_KEY: &str = "mentx_business";
 
-// Default dev secret — replace in production builds
-const LICENSE_SECRET: &str = "REPLACE-WITH-A-LONG-RANDOM-SECRET-AT-LEAST-32-CHARS";
+/// Dev fallback only — production builds must set INVORA_LICENSE_SECRET at compile time.
+const DEFAULT_LICENSE_SECRET: &str = "REPLACE-WITH-A-LONG-RANDOM-SECRET-AT-LEAST-32-CHARS";
+/// Dev fallback only — production builds must set INVORA_LICENSE_ZIP_PASSWORD at compile time.
+const DEFAULT_LICENSE_ZIP_PASSWORD: &str = "InvoraLite@2026";
+
+fn license_secret() -> &'static str {
+    option_env!("INVORA_LICENSE_SECRET")
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .unwrap_or(DEFAULT_LICENSE_SECRET)
+}
+
+fn license_zip_password() -> &'static str {
+    option_env!("INVORA_LICENSE_ZIP_PASSWORD")
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .unwrap_or(DEFAULT_LICENSE_ZIP_PASSWORD)
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -120,7 +135,7 @@ struct BusinessRecord {
 
 fn sign_payload(payload_b64: &str) -> String {
     let mut mac =
-        HmacSha256::new_from_slice(LICENSE_SECRET.as_bytes()).expect("hmac key");
+        HmacSha256::new_from_slice(license_secret().as_bytes()).expect("hmac key");
     mac.update(payload_b64.as_bytes());
     hex::encode(mac.finalize().into_bytes())
 }
@@ -411,17 +426,37 @@ fn save_stored_license(stored: &StoredLicense) -> Result<(), String> {
     Ok(())
 }
 
+fn zip_entry_meta(
+    archive: &mut ZipArchive<Cursor<&[u8]>>,
+    index: usize,
+) -> Result<(bool, String), String> {
+    let password = license_zip_password().as_bytes();
+    // Password-protected licence ZIPs cannot use by_index() alone — that yields
+    // "Password required to decrypt file" even when only listing entry names.
+    if let Ok(file) = archive.by_index_decrypt(index, password) {
+        return Ok((file.is_dir(), file.name().to_string()));
+    }
+    let file = archive.by_index(index).map_err(|error| {
+        format!("Could not open ZIP entry (wrong password or unsupported encryption): {error}")
+    })?;
+    Ok((file.is_dir(), file.name().to_string()))
+}
+
 fn read_zip_text_entry(
     archive: &mut ZipArchive<Cursor<&[u8]>>,
     index: usize,
     name: &str,
 ) -> Result<String, String> {
-    let password = LICENSE_ZIP_PASSWORD.as_bytes();
-    let mut file = archive
-        .by_index_decrypt(index, password)
-        .map_err(|error| format!("Could not decrypt {name}: {error}"))?;
-
+    let password = license_zip_password().as_bytes();
     let mut content = String::new();
+    if let Ok(mut file) = archive.by_index_decrypt(index, password) {
+        file.read_to_string(&mut content)
+            .map_err(|error| format!("Could not read {name}: {error}"))?;
+        return Ok(content);
+    }
+    let mut file = archive
+        .by_index(index)
+        .map_err(|error| format!("Could not decrypt {name}: {error}"))?;
     file.read_to_string(&mut content)
         .map_err(|error| format!("Could not read {name}: {error}"))?;
     Ok(content)
@@ -434,13 +469,10 @@ pub fn extract_license_content_from_zip(zip_bytes: &[u8]) -> Result<String, Stri
 
     let mut entries: Vec<(usize, String)> = Vec::new();
     for index in 0..archive.len() {
-        let file = archive
-            .by_index(index)
-            .map_err(|error| format!("Could not read ZIP entry: {error}"))?;
-        if file.is_dir() {
+        let (is_dir, name) = zip_entry_meta(&mut archive, index)?;
+        if is_dir {
             continue;
         }
-        let name = file.name().to_string();
         let lower = name.to_lowercase();
         if lower.ends_with(".txt") || lower.ends_with(".json") {
             entries.push((index, name));
@@ -721,5 +753,40 @@ pub fn start_trial() -> TrialResult {
         days_remaining: next.days_remaining,
         trial_ends_at: next.trial_ends_at,
         error: None,
+    }
+}
+
+#[cfg(test)]
+mod zip_extract_tests {
+    use super::*;
+    use std::io::Write;
+    use zip::write::SimpleFileOptions;
+    use zip::{AesMode, ZipWriter};
+
+    #[test]
+    fn extracts_aes256_password_zip() {
+        let password = license_zip_password();
+        let json = r#"{
+  "Device ID": "test-device",
+  "product": "InvoraLite",
+  "user e-mail": "a@b.com",
+  "Vallid for": "18 Months"
+}"#;
+
+        let mut buffer = Cursor::new(Vec::new());
+        {
+            let mut writer = ZipWriter::new(&mut buffer);
+            let options = SimpleFileOptions::default()
+                .compression_method(zip::CompressionMethod::Deflated)
+                .with_aes_encryption(AesMode::Aes256, password);
+            writer.start_file("license.json", options).expect("start");
+            writer.write_all(json.as_bytes()).expect("write");
+            writer.finish().expect("finish");
+        }
+
+        let bytes = buffer.into_inner();
+        let extracted = extract_license_content_from_zip(&bytes).expect("extract");
+        assert!(extracted.contains("test-device"));
+        assert!(extracted.contains("InvoraLite"));
     }
 }

@@ -48,6 +48,11 @@ _ref-app/
 _analyze*.js
 .env
 .env.*
+!.env.example
+license/.env.local
+license/*.zip
+license/issued*.txt
+license/issued*.json
 *.db
 *.db.vault
 .dbkey

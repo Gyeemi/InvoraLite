@@ -13,6 +13,7 @@
     "tauri:build": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/tauri-build.ps1",
     "tauri:icon": "tauri icon public/icon.svg -o src-tauri/icons",
     "license:pack": "node license/pack-license.cjs",
+    "license:issue-key": "node license/issue-key.cjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
