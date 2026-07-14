@@ -50,17 +50,30 @@ describe("isCreditSale", () => {
 });
 
 describe("formatAuditTimestamp", () => {
+  const expectedLocalAuditFormat = (date: Date) =>
+    date.toLocaleString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+
   afterEach(() => {
     vi.useRealTimers();
   });
 
   it("formats legacy UTC sqlite timestamps in local time", () => {
     vi.useFakeTimers();
+    // Instant equivalent to 15:18 in UTC+6 — assert against runner-local wall clock.
     vi.setSystemTime(new Date("2026-07-04T15:18:00+06:00"));
 
-    const formatted = formatAuditTimestamp("2026-07-04 09:18:00");
-    expect(formatted).toMatch(/4 Jul 2026/);
-    expect(formatted).toMatch(/15:18:00/);
+    const utcInstant = new Date("2026-07-04T09:18:00Z");
+    expect(formatAuditTimestamp("2026-07-04 09:18:00")).toBe(
+      expectedLocalAuditFormat(utcInstant),
+    );
   });
 
   it("handles brief local-stored sqlite timestamps without adding six hours", () => {
@@ -79,7 +92,9 @@ describe("formatAuditTimestamp", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-04T15:18:00+06:00"));
 
-    const formatted = formatAuditTimestamp("2026-07-04T09:18:00Z");
-    expect(formatted).toMatch(/15:18:00/);
+    const utcInstant = new Date("2026-07-04T09:18:00Z");
+    expect(formatAuditTimestamp("2026-07-04T09:18:00Z")).toBe(
+      expectedLocalAuditFormat(utcInstant),
+    );
   });
 });
