@@ -44,8 +44,15 @@
           "data:",
           "https://api.dicebear.com"
         ],
-        "style-src": ["'self'", "https://fonts.googleapis.com"],
-        "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
+        "style-src": [
+          "'self'",
+          "https://fonts.googleapis.com"
+        ],
+        "font-src": [
+          "'self'",
+          "https://fonts.gstatic.com",
+          "data:"
+        ],
         "script-src": "'self'"
       },
       "devCsp": {
@@ -72,16 +79,30 @@
           "data:",
           "https://api.dicebear.com"
         ],
-        "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
-        "script-src": ["'self'", "'unsafe-eval'", "'unsafe-inline'"]
+        "style-src": [
+          "'self'",
+          "'unsafe-inline'",
+          "https://fonts.googleapis.com"
+        ],
+        "font-src": [
+          "'self'",
+          "https://fonts.gstatic.com",
+          "data:"
+        ],
+        "script-src": [
+          "'self'",
+          "'unsafe-eval'",
+          "'unsafe-inline'"
+        ]
       }
     }
   },
   "bundle": {
     "active": true,
     "createUpdaterArtifacts": true,
-    "targets": ["nsis"],
+    "targets": [
+      "nsis"
+    ],
     "licenseFile": "EULA.txt",
     "copyright": "Copyright © 2026 Gyan B. Baraily",
     "publisher": "Gyan B. Baraily",
@@ -106,7 +127,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDJENTZEMDgzMUE3NUJEMEMKUldRTXZYVWFnOUJXTGN3VmdrWUFDS1UvM1doclVCZXVWaXFFZzNIakMzMUpieGxPbm9ZUWxoM0gK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg0RkVGNkQ4QzZGRDlCMDAKUldRQW0vM0cyUGIraEk2M2dWMlQ4aU00SlVHUUVkcXdFbTNNRzBQbmFpcCtkWUhJRnA0bzZ5NGUK",
       "endpoints": [
         "https://github.com/Gyeemi/InvoraLite/releases/latest/download/latest.json"
       ],

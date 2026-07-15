@@ -24,11 +24,13 @@ In the repo: **Settings → Secrets and variables → Actions**, add:
 | Secret | Value |
 |--------|--------|
 | `TAURI_SIGNING_PRIVATE_KEY` | Full contents of `src-tauri/keys/invoralite.key` |
-| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | Empty string if you used an empty password when generating |
+| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | Password for that key (also stored locally in `license/.env.local`) |
 | `INVORA_LICENSE_SECRET` | Same as `license/.env.local` (production licence HMAC) |
 | `INVORA_LICENSE_ZIP_PASSWORD` | Same as `license/.env.local` (ZIP unlock password) |
 
-Back up `invoralite.key` in a password manager. Losing it breaks the update chain for existing installs.
+`npm run tauri:build` loads `license/.env.local`, including `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, and injects the private key file into `TAURI_SIGNING_PRIVATE_KEY`.
+
+Back up `invoralite.key` **and** its password in a password manager. Losing either breaks the update chain for existing installs.
 
 ## Publish a new version
 

@@ -32,8 +32,7 @@ if (-not $env:TAURI_SIGNING_PRIVATE_KEY) {
     }
 }
 if (-not $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD) {
-    # Key generated with empty password locally
-    $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = ''
+    Write-Warning 'TAURI_SIGNING_PRIVATE_KEY_PASSWORD not set — signing may prompt or fail for encrypted keys'
 }
 
 & (Join-Path $PSScriptRoot 'with-msvc.ps1') 'powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/generate-installer-brand.ps1'
