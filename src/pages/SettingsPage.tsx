@@ -4,6 +4,7 @@ import { ManageOfficePanel } from "../components/ManageOfficePanel";
 import { PanelLoadingFallback } from "../components/PanelLoadingFallback";
 import { PasswordConfirmDialog } from "../components/PasswordConfirmDialog";
 import { PasswordInput } from "../components/PasswordInput";
+import { SoftwareUpdatesCard } from "../components/SoftwareUpdatesCard";
 import { useAuth } from "../contexts/AuthContext";
 import { usePermissions } from "../hooks/usePermissions";
 import { SaveButton } from "../components/SaveButton";
@@ -914,6 +915,8 @@ export function SettingsPage() {
           </Suspense>
         </div>
       )}
+
+      <SoftwareUpdatesCard />
 
       <PasswordConfirmDialog
         open={addStaffPasswordOpen}

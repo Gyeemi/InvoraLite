@@ -62,6 +62,11 @@ Or issue an `INVORA-` HMAC key (same signing secret as the build):
 npm run license:issue-key -- "<DEVICE-ID>" "18 Months" "Customer Name"
 ```
 
+## Auto-updates (GitHub Releases)
+
+See **[docs/AUTO_UPDATE.md](docs/AUTO_UPDATE.md)**. Clients use **Manage → Software updates** after you publish a signed `v*` Release.
+
+
 Dev builds without those env vars use placeholder secrets suitable only for local testing.
 
 ## Data location

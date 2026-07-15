@@ -30,7 +30,11 @@
           "'self'",
           "ipc:",
           "http://ipc.localhost",
-          "https://api.dicebear.com"
+          "https://api.dicebear.com",
+          "https://github.com",
+          "https://*.github.com",
+          "https://objects.githubusercontent.com",
+          "https://release-assets.githubusercontent.com"
         ],
         "img-src": [
           "'self'",
@@ -54,7 +58,11 @@
           "http://ipc.localhost",
           "http://localhost:1420",
           "ws://localhost:1420",
-          "https://api.dicebear.com"
+          "https://api.dicebear.com",
+          "https://github.com",
+          "https://*.github.com",
+          "https://objects.githubusercontent.com",
+          "https://release-assets.githubusercontent.com"
         ],
         "img-src": [
           "'self'",
@@ -72,6 +80,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": ["nsis"],
     "licenseFile": "EULA.txt",
     "copyright": "Copyright © 2026 Gyan B. Baraily",
@@ -92,6 +101,17 @@
         "displayLanguageSelector": false,
         "installerIcon": "icons/icon.ico",
         "uninstallerIcon": "icons/icon.ico"
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDJENTZEMDgzMUE3NUJEMEMKUldRTXZYVWFnOUJXTGN3VmdrWUFDS1UvM1doclVCZXVWaXFFZzNIakMzMUpieGxPbm9ZUWxoM0gK",
+      "endpoints": [
+        "https://github.com/Gyeemi/InvoraLite/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
       }
     }
   }

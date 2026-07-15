@@ -1,0 +1,64 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  publish-windows:
+    name: Build & release (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Write licence secrets for compile-time embedding
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path license | Out-Null
+          @(
+            "INVORA_LICENSE_SECRET=$env:INVORA_LICENSE_SECRET"
+            "INVORA_LICENSE_ZIP_PASSWORD=$env:INVORA_LICENSE_ZIP_PASSWORD"
+          ) | Set-Content -Path license/.env.local -Encoding utf8
+        env:
+          INVORA_LICENSE_SECRET: ${{ secrets.INVORA_LICENSE_SECRET }}
+          INVORA_LICENSE_ZIP_PASSWORD: ${{ secrets.INVORA_LICENSE_ZIP_PASSWORD }}
+
+      - name: Publish Tauri installer + updater JSON
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          INVORA_LICENSE_SECRET: ${{ secrets.INVORA_LICENSE_SECRET }}
+          INVORA_LICENSE_ZIP_PASSWORD: ${{ secrets.INVORA_LICENSE_ZIP_PASSWORD }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "InvoraLite ${{ github.ref_name }}"
+          releaseBody: "Windows installer and auto-update assets for InvoraLite."
+          releaseDraft: true
+          prerelease: false
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true
+          args: ""

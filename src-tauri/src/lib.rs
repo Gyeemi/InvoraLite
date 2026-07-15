@@ -217,6 +217,12 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
+            #[cfg(desktop)]
+            {
+                app.handle()
+                    .plugin(tauri_plugin_updater::Builder::new().build())?;
+                app.handle().plugin(tauri_plugin_process::init())?;
+            }
             let local_data_dir = app.path().app_local_data_dir().expect("app local data dir");
             let legacy_data_dir = app.path().app_data_dir().ok();
             init_database(&local_data_dir, legacy_data_dir.as_deref());

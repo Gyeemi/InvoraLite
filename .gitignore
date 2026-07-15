@@ -53,6 +53,10 @@ license/.env.local
 license/*.zip
 license/issued*.txt
 license/issued*.json
+# Updater signing private key — NEVER commit
+src-tauri/keys/*.key
+!src-tauri/keys/*.key.pub
+!src-tauri/keys/README.md
 *.db
 *.db.vault
 .dbkey

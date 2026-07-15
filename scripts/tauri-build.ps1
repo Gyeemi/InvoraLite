@@ -17,6 +17,21 @@ if (Test-Path $licenseEnv) {
     Write-Warning 'license\.env.local not found - using dev licence placeholders. See docs\LICENSE_ISSUANCE.md'
 }
 
+# Updater signing (required when createUpdaterArtifacts is true)
+if (-not $env:TAURI_SIGNING_PRIVATE_KEY -and -not $env:TAURI_SIGNING_PRIVATE_KEY_PATH) {
+    $updaterKey = Join-Path $root 'src-tauri\keys\invoralite.key'
+    if (Test-Path $updaterKey) {
+        $env:TAURI_SIGNING_PRIVATE_KEY_PATH = $updaterKey
+        Write-Host 'Using updater signing key from src-tauri\keys\invoralite.key'
+    } else {
+        Write-Warning 'No TAURI_SIGNING_PRIVATE_KEY / invoralite.key — updater signatures will fail. See docs\AUTO_UPDATE.md'
+    }
+}
+if (-not $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD) {
+    # Key generated with empty password locally
+    $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = ''
+}
+
 & (Join-Path $PSScriptRoot 'with-msvc.ps1') 'powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/generate-installer-brand.ps1'
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
