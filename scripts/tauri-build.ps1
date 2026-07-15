@@ -18,13 +18,17 @@ if (Test-Path $licenseEnv) {
 }
 
 # Updater signing (required when createUpdaterArtifacts is true)
-if (-not $env:TAURI_SIGNING_PRIVATE_KEY -and -not $env:TAURI_SIGNING_PRIVATE_KEY_PATH) {
+# Prefer key CONTENTS — nested `cmd /c` + paths with spaces break KEY_PATH reliably.
+if (-not $env:TAURI_SIGNING_PRIVATE_KEY) {
     $updaterKey = Join-Path $root 'src-tauri\keys\invoralite.key'
+    if ($env:TAURI_SIGNING_PRIVATE_KEY_PATH -and (Test-Path $env:TAURI_SIGNING_PRIVATE_KEY_PATH)) {
+        $updaterKey = $env:TAURI_SIGNING_PRIVATE_KEY_PATH
+    }
     if (Test-Path $updaterKey) {
-        $env:TAURI_SIGNING_PRIVATE_KEY_PATH = $updaterKey
-        Write-Host 'Using updater signing key from src-tauri\keys\invoralite.key'
+        $env:TAURI_SIGNING_PRIVATE_KEY = (Get-Content -LiteralPath $updaterKey -Raw).Trim()
+        Write-Host 'Loaded updater signing key into TAURI_SIGNING_PRIVATE_KEY'
     } else {
-        Write-Warning 'No TAURI_SIGNING_PRIVATE_KEY / invoralite.key — updater signatures will fail. See docs\AUTO_UPDATE.md'
+        Write-Warning 'No TAURI_SIGNING_PRIVATE_KEY / invoralite.key - updater signatures will fail. See docs\AUTO_UPDATE.md'
     }
 }
 if (-not $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD) {
