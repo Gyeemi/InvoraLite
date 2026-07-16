@@ -31,7 +31,7 @@ export function Footer() {
     <p className="pointer-events-none fixed bottom-4 left-0 right-0 z-50 text-center text-xs">
       <span className="relative inline-block">
         <span className="text-text-muted">
-          InvoraLite v.1.0.2  | © Baraily Innovations, 2026 | +975 176 06 130
+          InvoraLite v.1.0.3  | © Baraily Innovations, 2026 | +975 176 06 130
         </span>
         <span
           aria-hidden
@@ -39,7 +39,7 @@ export function Footer() {
             neonActive ? " footer-text-neon-overlay--active" : ""
           }`}
         >
-          InvoraLite v.1.0.2  | © Baraily Innovations, 2026 | +975 176 06 130
+          InvoraLite v.1.0.3  | © Baraily Innovations, 2026 | +975 176 06 130
         </span>
       </span>
     </p>

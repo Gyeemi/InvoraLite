@@ -23,12 +23,19 @@ import {
   invoiceCreditPaymentPrintStyles,
 } from "../lib/invoiceCreditPayment";
 import { printHtmlDocument } from "../lib/reportPrint";
+import {
+  DEFAULT_GST_RATE_PERCENT,
+  gstLabelForRates,
+  gstOnExclusive,
+  saleAmountsFromGstLines,
+} from "../lib/gst";
 import { cardClass, formatContactPhone, formatCurrency, formatDateGB, formatSalePaymentSummary, resolveSaleCreditDetails } from "../lib/constants";
 import type {
   Business,
   Contact,
   CustomerPayment,
   Sale,
+  SaleItem,
   SalesReturn,
   SalesReturnReason,
   SalesReturnSettlement,
@@ -50,6 +57,9 @@ function businessFromLines(business: Business) {
   const lines = [business.address.trim()].filter(Boolean);
   if (business.licenseNo.trim()) lines.push(`Licence No: ${business.licenseNo.trim()}`);
   if (business.tpnNo.trim()) lines.push(`TPN No: ${business.tpnNo.trim()}`);
+  if (business.hasGst && business.gstRegistrationNo.trim()) {
+    lines.push(`GST Registration No: ${business.gstRegistrationNo.trim()}`);
+  }
   return lines;
 }
 
@@ -66,6 +76,46 @@ function escapeHtml(value: string) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+function saleItemGstPercent(item: SaleItem) {
+  return item.gstPercent ?? DEFAULT_GST_RATE_PERCENT;
+}
+
+function saleItemLineGst(item: SaleItem) {
+  return gstOnExclusive(item.total, saleItemGstPercent(item));
+}
+
+function saleItemLineTotalInclGst(item: SaleItem) {
+  return item.total + saleItemLineGst(item);
+}
+
+function resolveSaleGstAmounts(business: Business, sale: Sale) {
+  if (!business.hasGst) return null;
+
+  const subtotal = sale.subtotal ?? sale.items.reduce((sum, item) => sum + item.total, 0);
+  const discount = sale.discountAmount ?? 0;
+  const gstLines = sale.items.map((item) => ({
+    lineTotal: item.total,
+    gstPercent: saleItemGstPercent(item),
+  }));
+
+  if (sale.gstAmount != null) {
+    return {
+      sellingSubtotal: subtotal,
+      discount,
+      netSelling: Math.max(0, subtotal - discount),
+      gstAmount: sale.gstAmount,
+      total: sale.total,
+      gstLabel: gstLabelForRates(gstLines.map((line) => line.gstPercent)),
+    };
+  }
+
+  const amounts = saleAmountsFromGstLines(gstLines, discount, true);
+  return {
+    ...amounts,
+    gstLabel: gstLabelForRates(gstLines.map((line) => line.gstPercent)),
+  };
 }
 
 export type SalePrintKind = "invoice" | "cash_memo" | "estimation";
@@ -117,6 +167,7 @@ function buildInvoicePrintHtml(
   kind: SalePrintKind = "invoice",
 ) {
   const meta = printDocumentMeta(kind);
+  const hasGst = business.hasGst;
   const fromLines = businessFromLines(business).map(escapeHtml);
   const billLines = billToLines(billTo).map(escapeHtml);
   const letterheadHtml = business.letterheadDataUrl
@@ -126,28 +177,50 @@ function buildInvoicePrintHtml(
     ? `<img class="logo" src="${escapeHtml(business.logoDataUrl)}" alt="Logo" />`
     : "";
   const itemsHtml = sale.items
-    .map(
-      (item) => `<tr>
+    .map((item) => {
+      const lineTotal = hasGst ? saleItemLineTotalInclGst(item) : item.total;
+      const lineGst = hasGst ? saleItemLineGst(item) : 0;
+      const gstRate = saleItemGstPercent(item);
+      return `<tr>
         <td>
           ${escapeHtml(item.productName)}
           ${item.imei1 ? `<div class="imei">IMEI: ${escapeHtml(item.imei1)}</div>` : ""}
         </td>
         <td class="qty">${item.quantity}</td>
         <td class="price">${escapeHtml(formatCurrency(item.unitPrice))}</td>
-        <td class="amount">${escapeHtml(formatCurrency(item.total))}</td>
-      </tr>`,
-    )
+        ${
+          hasGst
+            ? `<td class="gst">${escapeHtml(formatCurrency(lineGst))}<div class="gst-rate">${gstRate}%</div></td>`
+            : ""
+        }
+        <td class="amount">${escapeHtml(formatCurrency(lineTotal))}</td>
+      </tr>`;
+    })
     .join("");
 
   const invoiceSubtotal =
     sale.subtotal ?? sale.items.reduce((sum, item) => sum + item.total, 0);
   const invoiceDiscount = sale.discountAmount ?? 0;
-  const totalsHtml =
-    invoiceDiscount > 0
-      ? `<p class="subtotal">Subtotal: ${escapeHtml(formatCurrency(invoiceSubtotal))}</p>
+  const gstAmounts = resolveSaleGstAmounts(business, sale);
+  const totalsHtml = (() => {
+    if (gstAmounts) {
+      const discountRows =
+        invoiceDiscount > 0
+          ? `<p class="subtotal">Selling price: ${escapeHtml(formatCurrency(gstAmounts.sellingSubtotal))}</p>
+             <p class="discount">Discount: -${escapeHtml(formatCurrency(invoiceDiscount))}</p>
+             <p class="subtotal">Net selling price: ${escapeHtml(formatCurrency(gstAmounts.netSelling))}</p>`
+          : `<p class="subtotal">Selling price: ${escapeHtml(formatCurrency(gstAmounts.sellingSubtotal))}</p>`;
+      return `${discountRows}
+         <p class="subtotal">${escapeHtml(gstAmounts.gstLabel)}: ${escapeHtml(formatCurrency(gstAmounts.gstAmount))}</p>
+         <p class="grand-total">${escapeHtml(meta.totalLabel)}: ${escapeHtml(formatCurrency(sale.total))}</p>`;
+    }
+    if (invoiceDiscount > 0) {
+      return `<p class="subtotal">Subtotal: ${escapeHtml(formatCurrency(invoiceSubtotal))}</p>
          <p class="discount">Discount: -${escapeHtml(formatCurrency(invoiceDiscount))}</p>
-         <p class="grand-total">${escapeHtml(meta.totalLabel)}: ${escapeHtml(formatCurrency(sale.total))}</p>`
-      : `<p class="grand-total">${escapeHtml(meta.totalLabel)}: ${escapeHtml(formatCurrency(sale.total))}</p>`;
+         <p class="grand-total">${escapeHtml(meta.totalLabel)}: ${escapeHtml(formatCurrency(sale.total))}</p>`;
+    }
+    return `<p class="grand-total">${escapeHtml(meta.totalLabel)}: ${escapeHtml(formatCurrency(sale.total))}</p>`;
+  })();
 
   const paymentHtml = (() => {
     if (!meta.includePayment) {
@@ -264,7 +337,8 @@ function buildInvoicePrintHtml(
         color: #64748b;
       }
       table.items th.qty { width: 56px; }
-      table.items th.price { width: 120px; }
+      table.items th.price { width: 110px; }
+      table.items th.gst { width: 100px; }
       table.items th.total { width: 120px; text-align: right; }
       table.items td {
         padding: 12px 4px;
@@ -273,8 +347,10 @@ function buildInvoicePrintHtml(
         color: #0f172a;
       }
       table.items td.qty { text-align: left; }
-      table.items td.price { text-align: left; white-space: nowrap; }
+      table.items td.price,
+      table.items td.gst { text-align: left; white-space: nowrap; }
       table.items td.amount { text-align: right; white-space: nowrap; }
+      .gst-rate { margin-top: 2px; font-size: 11px; color: #64748b; }
       .imei { margin-top: 4px; font-size: 11px; color: #64748b; }
       .totals { margin-top: 12px; }
       .subtotal, .discount { margin: 8px 0 0; text-align: right; font-size: 14px; color: #475569; }
@@ -322,6 +398,7 @@ function buildInvoicePrintHtml(
             <th>Item</th>
             <th class="qty">Qty</th>
             <th class="price">Price</th>
+            ${hasGst ? '<th class="gst">GST</th>' : ""}
             <th class="total">Total</th>
           </tr>
         </thead>
@@ -657,39 +734,78 @@ export function InvoicePage() {
                     <th className="py-2">Item</th>
                     <th className="py-2">Qty</th>
                     <th className="py-2">Price</th>
+                    {business?.hasGst && <th className="py-2">GST</th>}
                     <th className="py-2 text-right">Total</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {sale.items.map((item, i) => (
-                    <tr key={i} className="border-b border-border/50">
-                      <td className="py-3 text-text-primary">
-                        {item.productName}
-                        {item.imei1 && (
-                          <p className="mt-0.5 text-xs text-text-muted">IMEI: {item.imei1}</p>
+                  {sale.items.map((item, i) => {
+                    const lineGst = business?.hasGst ? saleItemLineGst(item) : 0;
+                    const lineTotal = business?.hasGst ? saleItemLineTotalInclGst(item) : item.total;
+                    return (
+                      <tr key={i} className="border-b border-border/50">
+                        <td className="py-3 text-text-primary">
+                          {item.productName}
+                          {item.imei1 && (
+                            <p className="mt-0.5 text-xs text-text-muted">IMEI: {item.imei1}</p>
+                          )}
+                        </td>
+                        <td className="py-3">{item.quantity}</td>
+                        <td className="py-3">{formatCurrency(item.unitPrice)}</td>
+                        {business?.hasGst && (
+                          <td className="py-3">
+                            {formatCurrency(lineGst)}
+                            <p className="mt-0.5 text-xs text-text-muted">{saleItemGstPercent(item)}%</p>
+                          </td>
                         )}
-                      </td>
-                      <td className="py-3">{item.quantity}</td>
-                      <td className="py-3">{formatCurrency(item.unitPrice)}</td>
-                      <td className="py-3 text-right font-medium">{formatCurrency(item.total)}</td>
-                    </tr>
-                  ))}
+                        <td className="py-3 text-right font-medium">{formatCurrency(lineTotal)}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
               <div className="space-y-1 text-right text-sm">
-                {(sale.discountAmount ?? 0) > 0 && (
-                  <>
-                    <p className="text-text-secondary">
-                      Subtotal:{" "}
-                      {formatCurrency(
-                        sale.subtotal ?? sale.items.reduce((sum, item) => sum + item.total, 0),
-                      )}
-                    </p>
-                    <p className="text-accent-orange">
-                      Discount: -{formatCurrency(sale.discountAmount ?? 0)}
-                    </p>
-                  </>
-                )}
+                {(() => {
+                  const gstAmounts = business ? resolveSaleGstAmounts(business, sale) : null;
+                  if (gstAmounts) {
+                    return (
+                      <>
+                        <p className="text-text-secondary">
+                          Selling price: {formatCurrency(gstAmounts.sellingSubtotal)}
+                        </p>
+                        {(sale.discountAmount ?? 0) > 0 && (
+                          <>
+                            <p className="text-accent-orange">
+                              Discount: -{formatCurrency(sale.discountAmount ?? 0)}
+                            </p>
+                            <p className="text-text-secondary">
+                              Net selling price: {formatCurrency(gstAmounts.netSelling)}
+                            </p>
+                          </>
+                        )}
+                        <p className="text-text-secondary">
+                          {gstAmounts.gstLabel}: {formatCurrency(gstAmounts.gstAmount)}
+                        </p>
+                      </>
+                    );
+                  }
+                  if ((sale.discountAmount ?? 0) > 0) {
+                    return (
+                      <>
+                        <p className="text-text-secondary">
+                          Subtotal:{" "}
+                          {formatCurrency(
+                            sale.subtotal ?? sale.items.reduce((sum, item) => sum + item.total, 0),
+                          )}
+                        </p>
+                        <p className="text-accent-orange">
+                          Discount: -{formatCurrency(sale.discountAmount ?? 0)}
+                        </p>
+                      </>
+                    );
+                  }
+                  return null;
+                })()}
                 <p className="text-lg font-bold text-text-primary">
                   Grand Total: {formatCurrency(sale.total)}
                 </p>
