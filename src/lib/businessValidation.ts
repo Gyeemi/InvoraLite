@@ -33,7 +33,7 @@ export function validateBusiness(data: Business, requirePassword = true): boolea
 }
 
 export function normalizeBusiness(data: Business): Business {
-  return {
+  const next: Business = {
     ...data,
     businessName: data.businessName.trim(),
     licenseNo: data.licenseNo.trim(),
@@ -44,4 +44,15 @@ export function normalizeBusiness(data: Business): Business {
     gstRegistrationNo: data.hasGst ? data.gstRegistrationNo.trim() : "",
     fiscalYearStartMonth: normalizeFiscalYearStartMonth(data.fiscalYearStartMonth),
   };
+  if (data.logoDataUrl?.trim()) {
+    next.logoDataUrl = data.logoDataUrl.trim();
+  } else {
+    delete next.logoDataUrl;
+  }
+  if (data.letterheadDataUrl?.trim()) {
+    next.letterheadDataUrl = data.letterheadDataUrl.trim();
+  } else {
+    delete next.letterheadDataUrl;
+  }
+  return next;
 }

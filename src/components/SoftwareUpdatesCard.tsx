@@ -32,7 +32,7 @@ export function SoftwareUpdatesCard() {
         setMessage("Updates are only available in the desktop app.");
       } else if (result.status === "upToDate") {
         setVersion(result.currentVersion);
-        setMessage(`You are on the latest version (${result.currentVersion}).`);
+        setMessage("You are up-to-date.");
       } else if (result.status === "available") {
         setVersion(result.currentVersion);
         setPending(result);

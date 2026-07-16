@@ -1,5 +1,5 @@
-import { Printer, RotateCcw, XCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { ChevronDown, Printer, RotateCcw, XCircle } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { InvoiceCreditPaymentSection } from "../components/invoice/InvoiceCreditPaymentSection";
 import { PasswordConfirmDialog } from "../components/PasswordConfirmDialog";
 import { SalesReturnModal } from "../components/SalesReturnModal";
@@ -22,6 +22,7 @@ import {
   buildInvoiceCreditPaymentHtml,
   invoiceCreditPaymentPrintStyles,
 } from "../lib/invoiceCreditPayment";
+import { printHtmlDocument } from "../lib/reportPrint";
 import { cardClass, formatContactPhone, formatCurrency, formatDateGB, formatSalePaymentSummary, resolveSaleCreditDetails } from "../lib/constants";
 import type {
   Business,
@@ -67,15 +68,63 @@ function escapeHtml(value: string) {
     .replace(/"/g, "&quot;");
 }
 
+export type SalePrintKind = "invoice" | "cash_memo" | "estimation";
+
+const SALE_PRINT_OPTIONS: { kind: SalePrintKind; label: string; description: string }[] = [
+  { kind: "invoice", label: "Invoice", description: "Tax invoice for the customer" },
+  { kind: "cash_memo", label: "Cash Memo", description: "Simple cash sale memo" },
+  { kind: "estimation", label: "Estimation", description: "Price estimate — not a tax invoice" },
+];
+
+function printDocumentMeta(kind: SalePrintKind) {
+  switch (kind) {
+    case "cash_memo":
+      return {
+        title: "Cash Memo",
+        subtitle: "Cash sale memo",
+        docLabel: "Memo No",
+        totalLabel: "Grand Total",
+        includePayment: true,
+        pageTitlePrefix: "Cash Memo",
+      };
+    case "estimation":
+      return {
+        title: "Estimation",
+        subtitle: "Price estimation — not a tax invoice",
+        docLabel: "Estimate No",
+        totalLabel: "Estimated Total",
+        includePayment: false,
+        pageTitlePrefix: "Estimation",
+      };
+    default:
+      return {
+        title: "TAX Invoice",
+        subtitle: "Original Tax Invoice",
+        docLabel: "Invoice No",
+        totalLabel: "Grand Total",
+        includePayment: true,
+        pageTitlePrefix: "Invoice",
+      };
+  }
+}
+
 function buildInvoicePrintHtml(
   business: Business,
   sale: Sale,
   billTo: ReturnType<typeof resolveBillTo>,
   sales: Sale[],
   customerPayments: CustomerPayment[],
+  kind: SalePrintKind = "invoice",
 ) {
+  const meta = printDocumentMeta(kind);
   const fromLines = businessFromLines(business).map(escapeHtml);
   const billLines = billToLines(billTo).map(escapeHtml);
+  const letterheadHtml = business.letterheadDataUrl
+    ? `<div class="letterhead"><img src="${escapeHtml(business.letterheadDataUrl)}" alt="Letterhead" /></div>`
+    : "";
+  const logoHtml = business.logoDataUrl
+    ? `<img class="logo" src="${escapeHtml(business.logoDataUrl)}" alt="Logo" />`
+    : "";
   const itemsHtml = sale.items
     .map(
       (item) => `<tr>
@@ -83,8 +132,8 @@ function buildInvoicePrintHtml(
           ${escapeHtml(item.productName)}
           ${item.imei1 ? `<div class="imei">IMEI: ${escapeHtml(item.imei1)}</div>` : ""}
         </td>
-        <td>${item.quantity}</td>
-        <td>${escapeHtml(formatCurrency(item.unitPrice))}</td>
+        <td class="qty">${item.quantity}</td>
+        <td class="price">${escapeHtml(formatCurrency(item.unitPrice))}</td>
         <td class="amount">${escapeHtml(formatCurrency(item.total))}</td>
       </tr>`,
     )
@@ -97,10 +146,13 @@ function buildInvoicePrintHtml(
     invoiceDiscount > 0
       ? `<p class="subtotal">Subtotal: ${escapeHtml(formatCurrency(invoiceSubtotal))}</p>
          <p class="discount">Discount: -${escapeHtml(formatCurrency(invoiceDiscount))}</p>
-         <p class="grand-total">Grand Total: ${escapeHtml(formatCurrency(sale.total))}</p>`
-      : `<p class="grand-total">Grand Total: ${escapeHtml(formatCurrency(sale.total))}</p>`;
+         <p class="grand-total">${escapeHtml(meta.totalLabel)}: ${escapeHtml(formatCurrency(sale.total))}</p>`
+      : `<p class="grand-total">${escapeHtml(meta.totalLabel)}: ${escapeHtml(formatCurrency(sale.total))}</p>`;
 
   const paymentHtml = (() => {
+    if (!meta.includePayment) {
+      return `<p class="payment-meta">This estimation is for reference only.</p>`;
+    }
     const creditContext = saleCreditPaymentContext(sale, sales, customerPayments);
     if (creditContext) {
       return buildInvoiceCreditPaymentHtml(sale, creditContext);
@@ -128,65 +180,159 @@ function buildInvoicePrintHtml(
     </div>`;
   })();
 
-  return `<!DOCTYPE html><html><head><title>Invoice ${escapeHtml(sale.id)}</title>
+  return `<!DOCTYPE html><html><head>
+    <meta charset="utf-8" />
+    <title>${escapeHtml(meta.pageTitlePrefix)} ${escapeHtml(sale.id)}</title>
     <style>
+      @page { size: A4 portrait; margin: 12mm; }
       * { box-sizing: border-box; }
-      body { font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 32px; color: #0f172a; background: #fff; }
-      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-      .label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; margin: 0 0 6px; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #fff;
+        color: #0f172a;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 24px 28px;
+      }
+      .invoice { width: 100%; max-width: 720px; margin: 0 auto; }
+      .letterhead { margin: 0 0 16px; }
+      .letterhead img {
+        display: block;
+        width: 100%;
+        max-height: 120px;
+        object-fit: contain;
+        object-position: left center;
+      }
+      .logo {
+        display: block;
+        width: 64px;
+        height: 64px;
+        object-fit: contain;
+        margin: 0 0 10px;
+      }
+      .doc-header { text-align: center; margin: 0 0 24px; }
+      .doc-title { margin: 0; font-size: 22px; font-weight: 700; color: #0f172a; }
+      .doc-subtitle { margin: 4px 0 0; font-size: 13px; color: #64748b; }
+      .grid {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+      }
+      .grid-col {
+        display: table-cell;
+        width: 50%;
+        vertical-align: top;
+      }
+      .grid-col.right { text-align: right; }
+      .label {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin: 0 0 6px;
+      }
       .from-name { margin: 0 0 4px; font-size: 15px; font-weight: 600; color: #0f172a; }
-      .from-line, .bill-line { margin: 0 0 2px; font-size: 14px; line-height: 1.5; color: #475569; white-space: pre-line; }
-      .meta { text-align: right; font-size: 14px; color: #0f172a; }
+      .from-line, .bill-line {
+        margin: 0 0 2px;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #475569;
+        white-space: pre-line;
+      }
+      .meta { font-size: 14px; color: #0f172a; }
       .meta p { margin: 0 0 4px; }
       .meta-label { color: #64748b; }
-      .bill-to { margin-top: 16px; text-align: right; }
+      .bill-to { margin-top: 16px; }
       .bill-name { margin: 0 0 2px; font-size: 14px; font-weight: 600; color: #0f172a; }
-      table { width: 100%; border-collapse: collapse; margin-top: 28px; font-size: 14px; }
-      th { padding: 8px 4px; border-bottom: 1px solid #cbd5e1; text-align: left; font-weight: 500; color: #64748b; }
-      th:last-child, td.amount { text-align: right; }
-      td { padding: 12px 4px; border-bottom: 1px solid #e2e8f0; vertical-align: top; color: #0f172a; }
+      table.items {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 28px;
+        font-size: 14px;
+      }
+      table.items th {
+        padding: 8px 4px;
+        border-top: 1px solid #cbd5e1;
+        border-bottom: 1px solid #cbd5e1;
+        text-align: left;
+        font-weight: 500;
+        color: #64748b;
+      }
+      table.items th.qty { width: 56px; }
+      table.items th.price { width: 120px; }
+      table.items th.total { width: 120px; text-align: right; }
+      table.items td {
+        padding: 12px 4px;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: top;
+        color: #0f172a;
+      }
+      table.items td.qty { text-align: left; }
+      table.items td.price { text-align: left; white-space: nowrap; }
+      table.items td.amount { text-align: right; white-space: nowrap; }
       .imei { margin-top: 4px; font-size: 11px; color: #64748b; }
+      .totals { margin-top: 12px; }
       .subtotal, .discount { margin: 8px 0 0; text-align: right; font-size: 14px; color: #475569; }
       .discount { color: #ea580c; }
       .grand-total { margin: 12px 0 0; text-align: right; font-size: 18px; font-weight: 700; color: #0f172a; }
-      .payment-meta { margin: 16px 0 0; text-align: right; font-size: 13px; color: #0f172a; }
+      .payment-meta { margin: 16px 0 0; text-align: right; font-size: 13px; color: #64748b; }
       ${invoiceCreditPaymentPrintStyles}
-    </style></head><body>
-    <div class="grid">
-      <div>
-        <p class="label">From</p>
-        <p class="from-name">${escapeHtml(business.businessName)}</p>
-        ${fromLines.map((line) => `<p class="from-line">${line}</p>`).join("")}
+      @media print {
+        body { padding: 0; }
+        .invoice { max-width: none; }
+      }
+    </style>
+  </head><body>
+    <div class="invoice">
+      ${letterheadHtml}
+      <div class="doc-header">
+        <h1 class="doc-title">${escapeHtml(meta.title)}</h1>
+        <p class="doc-subtitle">${escapeHtml(meta.subtitle)}</p>
       </div>
-      <div class="meta">
-        <p><span class="meta-label">Invoice No:</span> ${escapeHtml(sale.id)}</p>
-        <p><span class="meta-label">Date:</span> ${escapeHtml(formatDateGB(sale.saleDate))}</p>
-        <div class="bill-to">
-          <p class="label">Bill To</p>
-          ${billLines
-            .map((line, index) =>
-              index === 0
-                ? `<p class="bill-name">${line}</p>`
-                : `<p class="bill-line">${line}</p>`,
-            )
-            .join("")}
+      <div class="grid">
+        <div class="grid-col">
+          ${logoHtml}
+          <p class="label">From</p>
+          <p class="from-name">${escapeHtml(business.businessName)}</p>
+          ${fromLines.map((line) => `<p class="from-line">${line}</p>`).join("")}
+        </div>
+        <div class="grid-col right meta">
+          <p><span class="meta-label">${escapeHtml(meta.docLabel)}:</span> ${escapeHtml(sale.id)}</p>
+          <p><span class="meta-label">Date:</span> ${escapeHtml(formatDateGB(sale.saleDate))}</p>
+          <div class="bill-to">
+            <p class="label">Bill To</p>
+            ${billLines
+              .map((line, index) =>
+                index === 0
+                  ? `<p class="bill-name">${line}</p>`
+                  : `<p class="bill-line">${line}</p>`,
+              )
+              .join("")}
+          </div>
         </div>
       </div>
+      <table class="items">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th class="qty">Qty</th>
+            <th class="price">Price</th>
+            <th class="total">Total</th>
+          </tr>
+        </thead>
+        <tbody>${itemsHtml}</tbody>
+      </table>
+      <div class="totals">
+        ${totalsHtml}
+        ${paymentHtml}
+      </div>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Qty</th>
-          <th>Price</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>${itemsHtml}</tbody>
-    </table>
-    ${totalsHtml}
-    ${paymentHtml}
-    </body></html>`;
+  </body></html>`;
 }
 
 export function InvoicePage() {
@@ -203,6 +349,8 @@ export function InvoicePage() {
   const [voiding, setVoiding] = useState(false);
   const [returnOpen, setReturnOpen] = useState(false);
   const [returning, setReturning] = useState(false);
+  const [printMenuOpen, setPrintMenuOpen] = useState(false);
+  const printMenuRef = useRef<HTMLDivElement>(null);
 
   async function reloadSales(preferredId?: string) {
     const [saleList, customerList, payments, returns] = await Promise.all([
@@ -229,6 +377,28 @@ export function InvoicePage() {
     void reloadSales(invoicePreview?.id);
   }, [invoicePreview]);
 
+  useEffect(() => {
+    if (!printMenuOpen) return;
+    function handlePointerDown(event: MouseEvent) {
+      if (!printMenuRef.current?.contains(event.target as Node)) {
+        setPrintMenuOpen(false);
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setPrintMenuOpen(false);
+    }
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [printMenuOpen]);
+
+  useEffect(() => {
+    setPrintMenuOpen(false);
+  }, [selectedId]);
+
   const sale = sales.find((s) => s.id === selectedId) ?? invoicePreview;
 
   const billTo = useMemo(
@@ -241,22 +411,11 @@ export function InvoicePage() {
     [sale, sales, customerPayments],
   );
 
-  function printInvoice() {
+  function printSaleDocument(kind: SalePrintKind) {
     if (!sale || !business || !billTo) return;
-    const html = buildInvoicePrintHtml(business, sale, billTo, sales, customerPayments);
-    const frame = document.createElement("iframe");
-    frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden";
-    document.body.appendChild(frame);
-    const doc = frame.contentWindow?.document;
-    if (!doc) return;
-    doc.open();
-    doc.write(html);
-    doc.close();
-    window.setTimeout(() => {
-      frame.contentWindow?.focus();
-      frame.contentWindow?.print();
-      window.setTimeout(() => frame.remove(), 1000);
-    }, 250);
+    setPrintMenuOpen(false);
+    const html = buildInvoicePrintHtml(business, sale, billTo, sales, customerPayments, kind);
+    printHtmlDocument(html);
   }
 
   async function handleConfirmVoid(password: string) {
@@ -364,14 +523,39 @@ export function InvoicePage() {
                 </button>
               </>
             )}
-            <button
-              type="button"
-              onClick={printInvoice}
-              className="flex items-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-semibold text-black"
-            >
-              <Printer className="h-4 w-4" />
-              Print Invoice
-            </button>
+            <div className="relative" ref={printMenuRef}>
+              <button
+                type="button"
+                onClick={() => setPrintMenuOpen((open) => !open)}
+                aria-expanded={printMenuOpen}
+                aria-haspopup="menu"
+                className="flex items-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-semibold text-black"
+              >
+                <Printer className="h-4 w-4" />
+                Print
+                <ChevronDown className={`h-4 w-4 transition-transform ${printMenuOpen ? "rotate-180" : ""}`} />
+              </button>
+              {printMenuOpen && (
+                <div
+                  role="menu"
+                  aria-label="Print as"
+                  className="absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-border bg-bg-card shadow-xl"
+                >
+                  {SALE_PRINT_OPTIONS.map((option) => (
+                    <button
+                      key={option.kind}
+                      type="button"
+                      role="menuitem"
+                      onClick={() => printSaleDocument(option.kind)}
+                      className="flex w-full flex-col items-start gap-0.5 px-4 py-3 text-left transition-colors hover:bg-bg-hover"
+                    >
+                      <span className="text-sm font-semibold text-text-primary">{option.label}</span>
+                      <span className="text-xs text-text-muted">{option.description}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

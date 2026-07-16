@@ -1,3 +1,8 @@
+/**
+ * Reliable HTML print for Tauri WebView2 / Chromium.
+ * Uses document.write (not blob URLs — production CSP default-src blocks blob iframes).
+ * Keeps a real off-screen viewport so CSS layout applies when printing.
+ */
 export function printHtmlDocument(html: string): void {
   const existing = document.querySelectorAll("iframe[data-invora-print]");
   existing.forEach((node) => node.remove());
@@ -5,8 +10,9 @@ export function printHtmlDocument(html: string): void {
   const frame = document.createElement("iframe");
   frame.setAttribute("data-invora-print", "1");
   frame.setAttribute("title", "Print");
+  // Off-screen but sized: zero-size iframes often print without CSS in WebView2.
   frame.style.cssText =
-    "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden";
+    "position:fixed;left:-10000px;top:0;width:794px;height:1123px;border:0;opacity:0;pointer-events:none;";
   document.body.appendChild(frame);
 
   const win = frame.contentWindow;
@@ -25,12 +31,14 @@ export function printHtmlDocument(html: string): void {
       win.focus();
       win.print();
     } finally {
-      window.setTimeout(() => frame.remove(), 1000);
+      window.setTimeout(() => frame.remove(), 1500);
     }
   };
 
-  // Wait briefly so layout/styles settle before the system print dialog.
-  window.setTimeout(triggerPrint, 300);
+  // Wait for layout/styles to settle before the system print dialog.
+  requestAnimationFrame(() => {
+    window.setTimeout(triggerPrint, 300);
+  });
 }
 
 export const REPORT_PRINT_STYLES = `

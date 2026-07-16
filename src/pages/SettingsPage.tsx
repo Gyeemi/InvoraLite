@@ -1,5 +1,5 @@
-import { Building2, BarChart3, Key, Pencil, Receipt, ScrollText, Shield, Trash2, Users, X } from "lucide-react";
-import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
+import { Building2, BarChart3, ImagePlus, Key, Pencil, Receipt, ScrollText, Shield, Trash2, Users, X } from "lucide-react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ManageOfficePanel } from "../components/ManageOfficePanel";
 import { PanelLoadingFallback } from "../components/PanelLoadingFallback";
 import { PasswordConfirmDialog } from "../components/PasswordConfirmDialog";
@@ -11,6 +11,7 @@ import { SaveButton } from "../components/SaveButton";
 import { getStaff, nextId, saveStaff, ensureStaffSeed } from "../lib/data";
 import { hashPassword } from "../lib/password";
 import { getBusinessValidationError, normalizeBusiness } from "../lib/businessValidation";
+import { fileToBusinessBrandDataUrl, type BusinessBrandKind } from "../lib/businessBranding";
 import {
   fiscalStartMonthInputValue,
   monthFromMonthInputValue,
@@ -146,9 +147,14 @@ export function SettingsPage() {
     gstRegistrationNo: business?.gstRegistrationNo ?? "",
     fiscalYearStartMonth: normalizeFiscalYearStartMonth(business?.fiscalYearStartMonth),
     password: "",
+    logoDataUrl: business?.logoDataUrl ?? "",
+    letterheadDataUrl: business?.letterheadDataUrl ?? "",
   });
   const [message, setMessage] = useState("");
   const [businessError, setBusinessError] = useState("");
+  const [brandUploading, setBrandUploading] = useState<BusinessBrandKind | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const letterheadInputRef = useRef<HTMLInputElement>(null);
 
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [userMessage, setUserMessage] = useState("");
@@ -233,8 +239,46 @@ export function SettingsPage() {
       gstRegistrationNo: business.gstRegistrationNo,
       fiscalYearStartMonth: normalizeFiscalYearStartMonth(business.fiscalYearStartMonth),
       password: "",
+      logoDataUrl: business.logoDataUrl ?? "",
+      letterheadDataUrl: business.letterheadDataUrl ?? "",
     });
   }, [business]);
+
+  async function handleBrandFileChange(kind: BusinessBrandKind, file: File | null) {
+    if (!file || !canManageBusiness) return;
+    setBrandUploading(kind);
+    setBusinessError("");
+    setMessage("");
+    try {
+      const dataUrl = await fileToBusinessBrandDataUrl(file, kind);
+      setForm((current) =>
+        kind === "logo"
+          ? { ...current, logoDataUrl: dataUrl }
+          : { ...current, letterheadDataUrl: dataUrl },
+      );
+      setMessage(
+        kind === "logo"
+          ? "Logo ready — save business details to apply it on printouts."
+          : "Letterhead ready — save business details to apply it on printouts.",
+      );
+    } catch (error) {
+      setBusinessError(error instanceof Error ? error.message : "Could not upload image.");
+    } finally {
+      setBrandUploading(null);
+      if (kind === "logo" && logoInputRef.current) logoInputRef.current.value = "";
+      if (kind === "letterhead" && letterheadInputRef.current) letterheadInputRef.current.value = "";
+    }
+  }
+
+  function clearBrandImage(kind: BusinessBrandKind) {
+    setBusinessError("");
+    setMessage("");
+    setForm((current) =>
+      kind === "logo"
+        ? { ...current, logoDataUrl: "" }
+        : { ...current, letterheadDataUrl: "" },
+    );
+  }
 
   async function handleBusinessPasswordConfirm(password: string): Promise<boolean> {
     const ok = await verifyPassword(password);
@@ -276,6 +320,8 @@ export function SettingsPage() {
         hasGst: form.hasGst,
         gstRegistrationNo: form.gstRegistrationNo,
         fiscalYearStartMonth: form.fiscalYearStartMonth,
+        logoDataUrl: form.logoDataUrl || undefined,
+        letterheadDataUrl: form.letterheadDataUrl || undefined,
         ...(form.password.trim() ? { password: form.password.trim() } : {}),
       };
 
@@ -598,6 +644,107 @@ export function SettingsPage() {
                 className={inputClass}
               />
             </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="rounded-xl border border-border bg-bg-main p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-text-primary">Business logo</p>
+                    <p className="mt-1 text-xs text-text-muted">
+                      Shown next to your business name on Invoice, Cash Memo, and Estimation printouts.
+                    </p>
+                  </div>
+                  {form.logoDataUrl && (
+                    <img
+                      src={form.logoDataUrl}
+                      alt="Business logo preview"
+                      className="h-14 w-14 rounded-lg border border-border object-contain bg-white"
+                    />
+                  )}
+                </div>
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={(e) => void handleBrandFileChange("logo", e.target.files?.[0] ?? null)}
+                />
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    disabled={!canManageBusiness || brandUploading === "logo"}
+                    onClick={() => logoInputRef.current?.click()}
+                    className="inline-flex items-center gap-2 rounded-lg border border-border bg-bg-card px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-bg-hover disabled:opacity-60"
+                  >
+                    <ImagePlus className="h-4 w-4" />
+                    {brandUploading === "logo" ? "Uploading…" : form.logoDataUrl ? "Replace logo" : "Upload logo"}
+                  </button>
+                  {form.logoDataUrl && canManageBusiness && (
+                    <button
+                      type="button"
+                      onClick={() => clearBrandImage("logo")}
+                      className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-accent-red transition-colors hover:bg-accent-red/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-border bg-bg-main p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-text-primary">Letterhead</p>
+                    <p className="mt-1 text-xs text-text-muted">
+                      Wide banner printed at the top of Invoice, Cash Memo, and Estimation documents.
+                    </p>
+                  </div>
+                </div>
+                {form.letterheadDataUrl && (
+                  <img
+                    src={form.letterheadDataUrl}
+                    alt="Letterhead preview"
+                    className="mt-3 h-16 w-full rounded-lg border border-border object-contain bg-white"
+                  />
+                )}
+                <input
+                  ref={letterheadInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={(e) =>
+                    void handleBrandFileChange("letterhead", e.target.files?.[0] ?? null)
+                  }
+                />
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    disabled={!canManageBusiness || brandUploading === "letterhead"}
+                    onClick={() => letterheadInputRef.current?.click()}
+                    className="inline-flex items-center gap-2 rounded-lg border border-border bg-bg-card px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-bg-hover disabled:opacity-60"
+                  >
+                    <ImagePlus className="h-4 w-4" />
+                    {brandUploading === "letterhead"
+                      ? "Uploading…"
+                      : form.letterheadDataUrl
+                        ? "Replace letterhead"
+                        : "Upload letterhead"}
+                  </button>
+                  {form.letterheadDataUrl && canManageBusiness && (
+                    <button
+                      type="button"
+                      onClick={() => clearBrandImage("letterhead")}
+                      className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-accent-red transition-colors hover:bg-accent-red/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className={labelClass}>License No.</label>

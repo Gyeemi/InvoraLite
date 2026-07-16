@@ -10,21 +10,27 @@ describe("printHtmlDocument", () => {
   afterEach(() => {
     vi.useRealTimers();
     document.body.innerHTML = "";
+    vi.restoreAllMocks();
   });
 
-  it("creates a hidden iframe and writes HTML into it", () => {
+  it("writes HTML into an off-screen iframe and prints", () => {
     const printMock = vi.fn();
     const focusMock = vi.fn();
+    const openMock = vi.fn();
+    const writeMock = vi.fn();
+    const closeMock = vi.fn();
 
+    const originalCreate = document.createElement.bind(document);
     vi.spyOn(document, "createElement").mockImplementation((tagName: string) => {
-      const element = document.createElementNS("http://www.w3.org/1999/xhtml", tagName) as HTMLElement;
+      const element = originalCreate(tagName);
       if (tagName.toLowerCase() === "iframe") {
         Object.defineProperty(element, "contentWindow", {
+          configurable: true,
           value: {
             document: {
-              open: vi.fn(),
-              write: vi.fn(),
-              close: vi.fn(),
+              open: openMock,
+              write: writeMock,
+              close: closeMock,
             },
             focus: focusMock,
             print: printMock,
@@ -34,13 +40,22 @@ describe("printHtmlDocument", () => {
       return element;
     });
 
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((cb: FrameRequestCallback) => {
+      cb(0);
+      return 0;
+    });
+
     printHtmlDocument("<html><body>Report</body></html>");
 
-    const iframe = document.querySelector("iframe");
+    const iframe = document.querySelector("iframe[data-invora-print]") as HTMLIFrameElement | null;
     expect(iframe).toBeTruthy();
-    expect(iframe?.style.visibility).toBe("hidden");
+    expect(iframe?.style.width).toBe("794px");
+    expect(openMock).toHaveBeenCalled();
+    expect(writeMock).toHaveBeenCalled();
+    expect(closeMock).toHaveBeenCalled();
 
     vi.runAllTimers();
+    expect(focusMock).toHaveBeenCalled();
     expect(printMock).toHaveBeenCalled();
   });
 });

@@ -1,7 +1,7 @@
 {
   "name": "invora",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Invora - offline inventory management with local SQLite storage",
   "type": "module",
   "scripts": {

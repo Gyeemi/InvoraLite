@@ -42,4 +42,23 @@ describe("normalizeBusiness", () => {
       normalizeBusiness(business({ hasGst: false, gstRegistrationNo: "GST-12345" })).gstRegistrationNo,
     ).toBe("");
   });
+
+  it("keeps branding data URLs when present", () => {
+    const normalized = normalizeBusiness(
+      business({
+        logoDataUrl: " data:image/png;base64,abc ",
+        letterheadDataUrl: " data:image/jpeg;base64,xyz ",
+      }),
+    );
+    expect(normalized.logoDataUrl).toBe("data:image/png;base64,abc");
+    expect(normalized.letterheadDataUrl).toBe("data:image/jpeg;base64,xyz");
+  });
+
+  it("omits empty branding fields", () => {
+    const normalized = normalizeBusiness(
+      business({ logoDataUrl: "  ", letterheadDataUrl: undefined }),
+    );
+    expect(normalized.logoDataUrl).toBeUndefined();
+    expect(normalized.letterheadDataUrl).toBeUndefined();
+  });
 });

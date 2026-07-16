@@ -33,6 +33,10 @@ export interface Business {
   username: string;
   /** Month (1–12) when the fiscal year begins. Defaults to January (calendar year). */
   fiscalYearStartMonth?: number;
+  /** Optional business logo as a data URL for invoices / memos. */
+  logoDataUrl?: string;
+  /** Optional letterhead banner as a data URL for print documents. */
+  letterheadDataUrl?: string;
 }
 
 export type ProductStatus = "in-stock" | "low" | "out";
