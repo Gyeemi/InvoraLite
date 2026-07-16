@@ -358,6 +358,7 @@ export function PurchasePage() {
     await syncShippingExpense(purchase);
     setShowForm(false);
     resetPurchaseForm();
+    showSuccess(`Purchase ${purchase.invoiceNo} saved and stock updated.`);
     } finally {
       setSaving(false);
     }

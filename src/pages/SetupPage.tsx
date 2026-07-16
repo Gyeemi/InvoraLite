@@ -1,4 +1,4 @@
-import { LogIn } from "lucide-react";
+import { AlertCircle, Loader2, LogIn } from "lucide-react";
 import { AppIcon } from "../components/AppIcon";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { useState } from "react";
@@ -18,6 +18,7 @@ import { passwordComplexityMessage, validatePasswordComplexity } from "../lib/pa
 export function SetupPage() {
   const { completeSetup } = useAuth();
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     businessName: "",
     licenseNo: "",
@@ -47,11 +48,16 @@ export function SetupPage() {
       setError("Please enter your GST Registration No.");
       return;
     }
-    const ok = await completeSetup({
-      ...form,
-      phone: form.phone.replace(/\D/g, ""),
-    });
-    if (!ok) setError("Please fill in all required fields.");
+    setSubmitting(true);
+    try {
+      const ok = await completeSetup({
+        ...form,
+        phone: form.phone.replace(/\D/g, ""),
+      });
+      if (!ok) setError("Please fill in all required fields.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -73,11 +79,17 @@ export function SetupPage() {
           className="rounded-2xl border border-border bg-bg-card p-8 shadow-lg shadow-black/20"
         >
           {error && (
-            <div className="mb-5 rounded-xl bg-accent-red/10 px-4 py-3 text-sm text-accent-red">
-              {error}
+            <div
+              role="alert"
+              aria-live="polite"
+              className="mb-5 flex items-start gap-2.5 rounded-xl border border-accent-red/20 bg-accent-red/10 px-4 py-3 text-sm text-accent-red"
+            >
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 
+          <fieldset disabled={submitting} className="min-w-0 border-0 p-0">
           <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
             Business Details
           </p>
@@ -262,13 +274,24 @@ export function SetupPage() {
               />
             </div>
           </div>
+          </fieldset>
 
           <button
             type="submit"
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-blue py-2.5 text-sm font-semibold text-white shadow-lg shadow-accent-blue/25 transition-colors hover:bg-accent-blue/90"
+            disabled={submitting}
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-accent-blue py-2.5 text-sm font-semibold text-white shadow-lg shadow-accent-blue/25 transition-colors hover:bg-accent-blue/90 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            <LogIn className="h-4 w-4" />
-            Complete Setup
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Completing setup…
+              </>
+            ) : (
+              <>
+                <LogIn className="h-4 w-4" />
+                Complete Setup
+              </>
+            )}
           </button>
         </form>
       </div>

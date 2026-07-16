@@ -12,6 +12,7 @@ import {
 } from "../components/PaymentHistoryModal";
 import { SupplierPaymentModal } from "../components/SupplierPaymentModal";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
 import { usePermissions } from "../hooks/usePermissions";
 import { SaveButton } from "../components/SaveButton";
 import {
@@ -63,6 +64,7 @@ type PendingAction =
 
 export function PeoplePage() {
   const { verifyPassword } = useAuth();
+  const { showSuccess } = useToast();
   const { canManageCustomers, canManageSuppliers, canViewSuppliers, canDelete } = usePermissions();
   const [tab, setTab] = useState<Tab>("customers");
   const [customers, setCustomers] = useState<Contact[]>([]);
@@ -195,6 +197,11 @@ export function PeoplePage() {
       await persistSuppliers([contact, ...suppliers]);
     }
     resetForm();
+    showSuccess(
+      tab === "customers"
+        ? `${trimmed} was added as a customer.`
+        : `${trimmed} was added as a supplier.`,
+    );
     } finally {
       setAdding(false);
     }
@@ -226,6 +233,7 @@ export function PeoplePage() {
       );
       await persistSupplierPayments(nextPayments);
     }
+    showSuccess(`${updated.name} was updated.`);
   }
 
   async function handleRecordPayment(payload: {
@@ -255,6 +263,7 @@ export function PeoplePage() {
     const next = [payment, ...supplierPayments];
     await persistSupplierPayments(next);
     setPaymentSupplier(null);
+    showSuccess(`Payment of ${formatCurrency(payload.amount)} recorded for ${paymentSupplier.name}.`);
     return true;
   }
 
@@ -293,6 +302,7 @@ export function PeoplePage() {
     await persistCustomerPayments(nextPayments);
     await persistCustomers(nextCustomers);
 
+    showSuccess(`Payment of ${formatCurrency(amount)} recorded for ${paymentCustomer.name}.`);
     return payment;
   }
 
@@ -302,6 +312,7 @@ export function PeoplePage() {
 
     if (pendingAction.type === "delete") {
       await handleDelete(pendingAction.contact);
+      showSuccess(`${pendingAction.contact.name} was deleted.`);
       setPendingAction(null);
       return true;
     }

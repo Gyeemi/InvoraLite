@@ -1,6 +1,7 @@
 import { Building2, BarChart3, ImagePlus, Key, Pencil, Receipt, ScrollText, Shield, Trash2, Users, X } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ManageOfficePanel } from "../components/ManageOfficePanel";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { PanelLoadingFallback } from "../components/PanelLoadingFallback";
 import { PasswordConfirmDialog } from "../components/PasswordConfirmDialog";
 import { PasswordInput } from "../components/PasswordInput";
@@ -161,6 +162,9 @@ export function SettingsPage() {
   const [userError, setUserError] = useState("");
 
   const [showAddStaff, setShowAddStaff] = useState(false);
+  const [addingUser, setAddingUser] = useState(false);
+  const [staffToRemove, setStaffToRemove] = useState<StaffMember | null>(null);
+  const [brandToRemove, setBrandToRemove] = useState<BusinessBrandKind | null>(null);
   const [addStaffPasswordOpen, setAddStaffPasswordOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<StaffMember | null>(null);
   const [passwordMember, setPasswordMember] = useState<StaffMember | null>(null);
@@ -375,6 +379,7 @@ export function SettingsPage() {
     }
 
     try {
+      setAddingUser(true);
       const member: StaffMember = {
         id: nextId("USR", staff),
         name,
@@ -389,6 +394,8 @@ export function SettingsPage() {
       setUserMessage(`${name} was added successfully.`);
     } catch {
       setUserError("Could not secure the password. Use the desktop app to add users.");
+    } finally {
+      setAddingUser(false);
     }
   }
 
@@ -397,6 +404,7 @@ export function SettingsPage() {
     await persistStaff(staff.filter((s) => s.id !== member.id));
     setUserMessage(`${member.name} was removed.`);
     setUserError("");
+    setStaffToRemove(null);
   }
 
   async function applyNameSave() {
@@ -682,7 +690,7 @@ export function SettingsPage() {
                   {form.logoDataUrl && canManageBusiness && (
                     <button
                       type="button"
-                      onClick={() => clearBrandImage("logo")}
+                      onClick={() => setBrandToRemove("logo")}
                       className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-accent-red transition-colors hover:bg-accent-red/10"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -734,7 +742,7 @@ export function SettingsPage() {
                   {form.letterheadDataUrl && canManageBusiness && (
                     <button
                       type="button"
-                      onClick={() => clearBrandImage("letterhead")}
+                      onClick={() => setBrandToRemove("letterhead")}
                       className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-accent-red transition-colors hover:bg-accent-red/10"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -1023,7 +1031,7 @@ export function SettingsPage() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => void handleRemoveUser(member)}
+                            onClick={() => setStaffToRemove(member)}
                             className="flex items-center gap-2 text-sm text-accent-red transition-colors hover:text-accent-red/80"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -1128,15 +1136,44 @@ export function SettingsPage() {
                 required
               />
             </div>
-            <button
-              type="submit"
-              className="w-full rounded-xl bg-accent-blue py-2.5 text-sm font-semibold text-white"
-            >
-              Add Staff
-            </button>
+            <SaveButton
+              label="Add Staff"
+              saving={addingUser}
+              savingLabel="Adding…"
+              className="w-full py-2.5"
+            />
           </form>
         </SettingsModal>
       )}
+
+      <ConfirmDialog
+        open={staffToRemove !== null}
+        title="Remove staff member?"
+        description={
+          staffToRemove
+            ? `${staffToRemove.name} will lose access immediately. This cannot be undone.`
+            : undefined
+        }
+        confirmLabel="Remove"
+        confirmTone="danger"
+        onClose={() => setStaffToRemove(null)}
+        onConfirm={async () => {
+          if (staffToRemove) await handleRemoveUser(staffToRemove);
+        }}
+      />
+
+      <ConfirmDialog
+        open={brandToRemove !== null}
+        title={brandToRemove === "logo" ? "Remove business logo?" : "Remove letterhead?"}
+        description="This image will be removed from printed invoices and receipts after you save business details."
+        confirmLabel="Remove"
+        confirmTone="danger"
+        onClose={() => setBrandToRemove(null)}
+        onConfirm={() => {
+          if (brandToRemove) clearBrandImage(brandToRemove);
+          setBrandToRemove(null);
+        }}
+      />
 
       {editingMember && (
         <SettingsModal title="Edit Name" onClose={() => setEditingMember(null)}>

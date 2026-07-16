@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { AccessRestricted } from "./AccessRestricted";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { PasswordConfirmDialog } from "./PasswordConfirmDialog";
 import { useAuth } from "../contexts/AuthContext";
 import { usePermissions } from "../hooks/usePermissions";
@@ -231,6 +232,8 @@ export function ReportsAnalyticsPanel() {
   const [manualJournal, setManualJournal] = useState<JournalEntry[]>([]);
   const [closes, setCloses] = useState<MonthlyClose[]>([]);
   const [message, setMessage] = useState("");
+  const [closeMonthConfirmOpen, setCloseMonthConfirmOpen] = useState(false);
+  const [closingMonth, setClosingMonth] = useState(false);
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null);
 
   const [manualForm, setManualForm] = useState({
@@ -349,11 +352,17 @@ export function ReportsAnalyticsPanel() {
       setMessage("This period is already closed.");
       return;
     }
-    const close = buildMonthlyClose(periodKey, pl, user?.name ?? "Admin");
-    const next = [close, ...closes.filter((item) => item.periodKey !== periodKey)];
-    await saveMonthlyCloses(next);
-    setCloses(next);
-    setMessage(`Period ${periodKey} closed. Net profit: ${formatCurrency(pl.netProfit)}`);
+    setClosingMonth(true);
+    try {
+      const close = buildMonthlyClose(periodKey, pl, user?.name ?? "Admin");
+      const next = [close, ...closes.filter((item) => item.periodKey !== periodKey)];
+      await saveMonthlyCloses(next);
+      setCloses(next);
+      setCloseMonthConfirmOpen(false);
+      setMessage(`Period ${periodKey} closed. Net profit: ${formatCurrency(pl.netProfit)}`);
+    } finally {
+      setClosingMonth(false);
+    }
   }
 
   function printTaxReport(targetPeriodKey = periodKey, closeRecord?: MonthlyClose | null) {
@@ -1099,7 +1108,7 @@ export function ReportsAnalyticsPanel() {
               <button
                 type="button"
                 disabled={closed}
-                onClick={() => void handleMonthlyClose()}
+                onClick={() => setCloseMonthConfirmOpen(true)}
                 className="rounded-xl bg-accent-purple px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
               >
                 {closed ? "Period Already Closed" : "Close Month"}
@@ -1160,6 +1169,19 @@ export function ReportsAnalyticsPanel() {
           </div>
         </div>
       )}
+      <ConfirmDialog
+        open={closeMonthConfirmOpen}
+        title="Close accounting period?"
+        description={`Closing ${periodKey} locks this period for editing. Net profit: ${formatCurrency(pl.netProfit)}. This action cannot be undone.`}
+        confirmLabel="Close Period"
+        loadingLabel="Closing…"
+        confirmTone="danger"
+        loading={closingMonth}
+        onClose={() => {
+          if (!closingMonth) setCloseMonthConfirmOpen(false);
+        }}
+        onConfirm={handleMonthlyClose}
+      />
     </div>
   );
 }

@@ -66,7 +66,7 @@ export function SoftwareUpdatesCard() {
         <h3 className="text-lg font-semibold text-text-primary">Software updates</h3>
         <p className="mt-1 text-sm text-text-secondary">
           Installed version <span className="font-medium text-text-primary">{version}</span>. Updates
-          are downloaded from GitHub Releases when available.
+          are downloaded from Software Host Releases when available.
         </p>
       </div>
 

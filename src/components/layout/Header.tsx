@@ -2,6 +2,7 @@ import { ChevronDown, Camera, Download, KeyRound, LogOut, Settings, Upload, User
 import { useEffect, useRef, useState } from "react";
 import { AppIcon } from "../AppIcon";
 import { BackupPasswordDialog } from "../BackupPasswordDialog";
+import { ConfirmDialog } from "../ConfirmDialog";
 import { LicenseManageModal } from "../LicenseManageModal";
 import { LicenseValidModal } from "../LicenseValidModal";
 import { MyAccountModal } from "../MyAccountModal";
@@ -37,6 +38,8 @@ export function Header() {
   const [restoreBackupPasswordOpen, setRestoreBackupPasswordOpen] = useState(false);
   const [pendingRestoreSource, setPendingRestoreSource] = useState<string | null>(null);
   const [myAccountOpen, setMyAccountOpen] = useState(false);
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  const [logoutBusy, setLogoutBusy] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -186,6 +189,17 @@ export function Header() {
       return false;
     } finally {
       setDbBusy(false);
+    }
+  }
+
+  async function confirmLogout() {
+    setLogoutBusy(true);
+    try {
+      await logout();
+      setMenuOpen(false);
+      setLogoutConfirmOpen(false);
+    } finally {
+      setLogoutBusy(false);
     }
   }
 
@@ -382,7 +396,7 @@ export function Header() {
                     type="button"
                     onClick={() => {
                       setMenuOpen(false);
-                      void logout();
+                      setLogoutConfirmOpen(true);
                     }}
                     className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm text-accent-red transition-colors hover:bg-accent-red/10"
                   >
@@ -442,6 +456,20 @@ export function Header() {
       />
 
       <MyAccountModal open={myAccountOpen} onClose={() => setMyAccountOpen(false)} />
+
+      <ConfirmDialog
+        open={logoutConfirmOpen}
+        title="Sign out?"
+        description="You will need to sign in again to access your dashboard."
+        confirmLabel="Sign Out"
+        confirmTone="danger"
+        loading={logoutBusy}
+        loadingLabel="Signing out…"
+        onClose={() => {
+          if (!logoutBusy) setLogoutConfirmOpen(false);
+        }}
+        onConfirm={confirmLogout}
+      />
     </>
   );
 }

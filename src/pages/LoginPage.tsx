@@ -1,8 +1,9 @@
-import { Eye, EyeOff, LogIn } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Loader2, LogIn } from "lucide-react";
 import { useState } from "react";
 import { AppIcon } from "../components/AppIcon";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { useAuth } from "../contexts/AuthContext";
+import { formatLoginFailureMessage, formatLoginLockoutMessage } from "../lib/authLogin";
 
 export function LoginPage() {
   const { login, business, getLoginLockoutStatus } = useAuth();
@@ -10,25 +11,42 @@ export function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  function clearError() {
+    if (error) setError("");
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    const lockout = await getLoginLockoutStatus(identifier);
-    if (lockout?.locked) {
-      const minutes = Math.max(1, Math.ceil((lockout.remainingSeconds ?? 0) / 60));
-      setError(`Account locked after too many failed attempts. Try again in about ${minutes} minute(s).`);
+
+    const trimmedIdentifier = identifier.trim();
+    if (!trimmedIdentifier) {
+      setError("Enter your email or username.");
       return;
     }
-    const ok = await login(identifier, password);
-    if (!ok) {
-      const afterFailure = await getLoginLockoutStatus(identifier);
-      if (afterFailure?.locked) {
-        const minutes = Math.max(1, Math.ceil((afterFailure.remainingSeconds ?? 0) / 60));
-        setError(`Account locked. Try again in about ${minutes} minute(s).`);
+    if (!password) {
+      setError("Enter your password.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const lockout = await getLoginLockoutStatus(trimmedIdentifier);
+      if (lockout?.locked) {
+        setError(formatLoginLockoutMessage(lockout));
         return;
       }
-      setError("Incorrect email, username, or password.");
+
+      const ok = await login(trimmedIdentifier, password);
+      if (!ok) {
+        const afterFailure = await getLoginLockoutStatus(trimmedIdentifier);
+        setError(formatLoginFailureMessage(afterFailure));
+        setPassword("");
+      }
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -52,8 +70,13 @@ export function LoginPage() {
           className="rounded-2xl border border-border bg-bg-card p-8 shadow-lg shadow-black/20"
         >
           {error && (
-            <div className="mb-4 rounded-xl bg-accent-red/10 px-4 py-3 text-sm text-accent-red">
-              {error}
+            <div
+              role="alert"
+              aria-live="polite"
+              className="mb-4 flex items-start gap-2.5 rounded-xl border border-accent-red/20 bg-accent-red/10 px-4 py-3 text-sm text-accent-red"
+            >
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 
@@ -64,11 +87,15 @@ export function LoginPage() {
             <input
               id="identifier"
               value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
+              onChange={(e) => {
+                setIdentifier(e.target.value);
+                clearError();
+              }}
               placeholder="Enter email or username"
               required
               autoComplete="username"
-              className="w-full rounded-xl border border-border bg-bg-main px-4 py-2.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-accent-blue"
+              disabled={submitting}
+              className="w-full rounded-xl border border-border bg-bg-main px-4 py-2.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-accent-blue disabled:opacity-60"
             />
           </div>
 
@@ -81,16 +108,22 @@ export function LoginPage() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  clearError();
+                }}
                 placeholder="Enter your password"
                 required
                 autoComplete="current-password"
-                className="w-full rounded-xl border border-border bg-bg-main px-4 py-2.5 pr-10 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-accent-blue"
+                disabled={submitting}
+                className="w-full rounded-xl border border-border bg-bg-main px-4 py-2.5 pr-10 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-accent-blue disabled:opacity-60"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted transition-colors hover:text-text-secondary"
+                disabled={submitting}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted transition-colors hover:text-text-secondary disabled:opacity-60"
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -99,10 +132,20 @@ export function LoginPage() {
 
           <button
             type="submit"
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-blue py-2.5 text-sm font-semibold text-white shadow-lg shadow-accent-blue/25 transition-colors hover:bg-accent-blue/90"
+            disabled={submitting}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-blue py-2.5 text-sm font-semibold text-white shadow-lg shadow-accent-blue/25 transition-colors hover:bg-accent-blue/90 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            <LogIn className="h-4 w-4" />
-            Sign In
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Signing in…
+              </>
+            ) : (
+              <>
+                <LogIn className="h-4 w-4" />
+                Sign In
+              </>
+            )}
           </button>
         </form>
       </div>

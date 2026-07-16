@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { inputClass, labelClass } from "../lib/constants";
 
 interface PasswordConfirmDialogProps {
@@ -7,6 +7,7 @@ interface PasswordConfirmDialogProps {
   title: string;
   description?: string;
   confirmLabel?: string;
+  loadingLabel?: string;
   onClose: () => void;
   onConfirm: (password: string) => Promise<boolean>;
 }
@@ -16,9 +17,11 @@ export function PasswordConfirmDialog({
   title,
   description = "Enter your password to continue.",
   confirmLabel = "Confirm",
+  loadingLabel = "Verifying…",
   onClose,
   onConfirm,
 }: PasswordConfirmDialogProps) {
+  const titleId = useId();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -29,6 +32,17 @@ export function PasswordConfirmDialog({
     setError("");
     setSubmitting(false);
   }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && !submitting) onClose();
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open, submitting, onClose]);
 
   if (!open) return null;
 
@@ -50,14 +64,29 @@ export function PasswordConfirmDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-bg-card p-6 shadow-2xl">
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4"
+      onClick={() => {
+        if (!submitting) onClose();
+      }}
+      role="presentation"
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl border border-border bg-bg-card p-6 shadow-2xl"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="mb-4 flex items-center justify-between gap-3">
-          <h3 className="text-lg font-semibold text-text-primary">{title}</h3>
+          <h3 id={titleId} className="text-lg font-semibold text-text-primary">
+            {title}
+          </h3>
           <button
             type="button"
             onClick={onClose}
-            className="text-text-muted transition-colors hover:text-text-primary"
+            disabled={submitting}
+            className="text-text-muted transition-colors hover:text-text-primary disabled:opacity-50"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -66,7 +95,12 @@ export function PasswordConfirmDialog({
         <p className="mb-4 text-sm text-text-secondary">{description}</p>
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
           {error && (
-            <div className="rounded-xl bg-accent-red/10 px-4 py-3 text-sm text-accent-red">{error}</div>
+            <div
+              role="alert"
+              className="rounded-xl bg-accent-red/10 px-4 py-3 text-sm text-accent-red"
+            >
+              {error}
+            </div>
           )}
           <div>
             <label className={labelClass}>Password</label>
@@ -77,6 +111,7 @@ export function PasswordConfirmDialog({
               className={inputClass}
               autoComplete="current-password"
               autoFocus
+              disabled={submitting}
             />
           </div>
           <div className="flex gap-2">
@@ -85,12 +120,13 @@ export function PasswordConfirmDialog({
               disabled={submitting}
               className="flex-1 rounded-xl bg-accent-purple py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-purple/90 disabled:opacity-60"
             >
-              {confirmLabel}
+              {submitting ? loadingLabel : confirmLabel}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-border px-4 py-2.5 text-sm text-text-secondary"
+              disabled={submitting}
+              className="rounded-xl border border-border px-4 py-2.5 text-sm text-text-secondary disabled:opacity-60"
             >
               Cancel
             </button>

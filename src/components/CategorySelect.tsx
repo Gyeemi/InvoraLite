@@ -1,5 +1,6 @@
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useEffect, useId, useState } from "react";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { usePermissions } from "../hooks/usePermissions";
 import { addCategory, getCategories, removeCategory } from "../lib/categories";
 import { inputClass } from "../lib/constants";
@@ -25,6 +26,7 @@ export function CategorySelect({
   const [categories, setCategories] = useState<string[]>([]);
   const [newCategory, setNewCategory] = useState("");
   const [error, setError] = useState("");
+  const [categoryToRemove, setCategoryToRemove] = useState<string | null>(null);
   const titleId = useId();
 
   useEffect(() => {
@@ -217,7 +219,7 @@ export function CategorySelect({
                       <span className="text-sm text-text-primary">{category}</span>
                       <button
                         type="button"
-                        onClick={() => void handleRemoveCategory(category)}
+                        onClick={() => setCategoryToRemove(category)}
                         className="rounded-lg p-1.5 text-text-muted transition-colors hover:bg-accent-red/10 hover:text-accent-red"
                         aria-label={`Remove ${category}`}
                       >
@@ -243,6 +245,25 @@ export function CategorySelect({
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={categoryToRemove !== null}
+        title="Remove category?"
+        description={
+          categoryToRemove
+            ? `Remove "${categoryToRemove}"? Products using this category will switch to another category.`
+            : undefined
+        }
+        confirmLabel="Remove"
+        confirmTone="danger"
+        onClose={() => setCategoryToRemove(null)}
+        onConfirm={async () => {
+          if (categoryToRemove) {
+            await handleRemoveCategory(categoryToRemove);
+            setCategoryToRemove(null);
+          }
+        }}
+      />
     </>
   );
 }
