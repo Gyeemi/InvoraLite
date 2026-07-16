@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, RefreshCw } from "lucide-react";
+import { ArrowUpCircle, Download, RefreshCw } from "lucide-react";
 import {
   checkForAppUpdate,
   downloadInstallAndRelaunch,
@@ -21,6 +21,18 @@ export function SoftwareUpdatesCard() {
     void getAppVersion().then(setVersion);
   }, []);
 
+  useEffect(() => {
+    void (async () => {
+      const result = await checkForAppUpdate();
+      if (result.status === "available") {
+        setVersion(result.currentVersion);
+        setPending(result);
+      } else if (result.status === "upToDate") {
+        setVersion(result.currentVersion);
+      }
+    })();
+  }, []);
+
   async function handleCheck() {
     setBusy(true);
     setError("");
@@ -36,9 +48,7 @@ export function SoftwareUpdatesCard() {
       } else if (result.status === "available") {
         setVersion(result.currentVersion);
         setPending(result);
-        setMessage(
-          `Update ${result.update.version} is available (current ${result.currentVersion}).`,
-        );
+        setMessage("");
       } else {
         setError(result.message);
       }
@@ -70,6 +80,22 @@ export function SoftwareUpdatesCard() {
         </p>
       </div>
 
+      {pending && (
+        <div
+          role="status"
+          className="flex items-start gap-3 rounded-xl border border-accent-green/30 bg-accent-green/10 px-4 py-3"
+        >
+          <ArrowUpCircle className="mt-0.5 h-5 w-5 shrink-0 text-accent-green" />
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-accent-green">Update Available</p>
+            <p className="mt-0.5 text-sm text-text-secondary">
+              Version <span className="font-medium text-text-primary">{pending.update.version}</span>{" "}
+              is ready to install (current {pending.currentVersion}).
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
@@ -85,7 +111,7 @@ export function SoftwareUpdatesCard() {
             type="button"
             disabled={busy}
             onClick={() => void handleInstall()}
-            className="inline-flex items-center gap-2 rounded-lg border border-accent-blue px-4 py-2 text-sm font-medium text-accent-blue transition-opacity disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg border border-accent-green bg-accent-green px-4 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-60"
           >
             <Download className="h-4 w-4" />
             Download & install {pending.update.version}

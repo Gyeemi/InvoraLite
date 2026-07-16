@@ -1,6 +1,6 @@
 [package]
 name = "invora"
-version = "1.0.3"
+version = "1.0.4"
 description = "Invora — offline inventory management"
 authors = ["Gyan B. Baraily"]
 edition = "2021"

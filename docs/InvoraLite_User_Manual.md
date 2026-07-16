@@ -1,6 +1,6 @@
 # InvoraLite User Manual
 
-**Version 1.0.0**  
+**Version 1.0.4**  
 **Offline Inventory & Retail Management for Windows**
 
 ---
@@ -50,7 +50,7 @@ InvoraLite is a desktop application for retail and inventory businesses. It help
 
 ### 2.1 Installation
 
-1. Run the installer: `InvoraLite v.1.0.0 DD-MM-YYYY x64-setup.exe` (date varies by build)
+1. Run the installer: `InvoraLite v.1.0.4 DD-MM-YYYY x64-setup.exe` (date varies by build)
 2. Follow the setup wizard
 3. Launch **InvoraLite** from the Start menu or desktop shortcut
 
@@ -78,10 +78,16 @@ Click **Complete Setup** to finish.
 
 ### 2.4 Sign in
 
-1. Enter your **username** and **password**
+1. Enter your **email/username** and **password**
 2. Click **Sign In**
 
-The session automatically logs out after **30 minutes** of inactivity.
+If credentials are wrong, InvoraLite shows a clear **Wrong credentials** message. After several failed attempts the account may be temporarily locked.
+
+### 2.5 Sign out
+
+Use **Logout** in the sidebar or profile menu. You will be asked to confirm before signing out.
+
+The session also logs out automatically after **30 minutes** of inactivity.
 
 ---
 
@@ -293,8 +299,10 @@ Open **Invoice** from the sidebar.
 | Action | Description |
 |--------|-------------|
 | **Sales Return** | Customer goods return — stock in + settlement (see §10.1) |
-| **Print Invoice** | Print GST tax invoice for selected sale |
+| **Print** | Choose **Invoice** (tax invoice) or **Cash Memo** |
 | **Void Sale** | Cancel entire sale, restore stock, reverse credit (password required) |
+
+When GST is enabled, the invoice shows **Item | Qty | Price | GST | Total**, with selling price, GST, and grand total breakdown. Printed invoices use a professional A4 tax-invoice layout with business branding (logo/letterhead when configured).
 
 Credit sales show payment status including settlements and outstanding balance.
 
@@ -378,7 +386,17 @@ See [Section 12](#12-accounting--tax-reports).
 
 Browse system audit trail — logins, stock changes, sale voids, and other recorded actions. Use **Refresh** to update the list.
 
-### 11.6 Backup (Admin — header menu)
+### 11.6 Software updates
+
+Under **Manage → Software updates**:
+
+1. The installed version is shown automatically
+2. When a newer release is available, an **Update Available** banner appears
+3. Click **Download & install** to update (desktop app only; requires internet)
+
+Updates are downloaded from Software Host Releases.
+
+### 11.7 Backup (Admin — header menu)
 
 Access **Export Encrypted Backup** and **Restore Database** from the profile menu (top-right, Admin only).
 
@@ -489,12 +507,16 @@ Application data folder: `%LOCALAPPDATA%\InvoraLite\`
 | Document | Format | How to print |
 |----------|--------|--------------|
 | Sale receipt | 80mm thermal | Complete Sale & Print Receipt |
-| Tax invoice | Standard A4 | Invoice → Print Invoice |
+| Tax invoice | Standard A4 | Invoice → Print → Invoice |
+| Cash memo | Standard A4 | Invoice → Print → Cash Memo |
+| Quotation estimation | Standard A4 | Pricing → Quotations → Print |
 | Customer payment receipt | A5 landscape | Save Payment & Print Payment Receipt |
 | Tax submission report | A4 portrait | Manage → Reports → Print Tax Report |
 | Expense report | Standard | Manage → Office → Print |
 
 Use your system's print dialog to select the correct printer and paper size.
+
+Quotations can include products that are not yet in inventory (type a name and choose **Add as new product**). Converting a quotation to a sale creates missing products automatically when needed.
 
 ---
 
@@ -552,7 +574,7 @@ Contact **EDP IT Department** or your InvoraLite license provider for activation
 | Platform | Windows (Tauri desktop) |
 | Currency | Nu. (Bhutanese Ngultrum) |
 
-*This manual describes InvoraLite v1.0.0. Features may be updated in future releases.*
+*This manual describes InvoraLite v1.0.4. Features may be updated in future releases.*
 
 ---
 

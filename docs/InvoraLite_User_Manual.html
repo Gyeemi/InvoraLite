@@ -146,7 +146,7 @@
   </div>
   <div class="content">
     <h1>InvoraLite User Manual</h1>
-<p><strong>Version 1.0.0</strong></p>
+<p><strong>Version 1.0.4</strong></p>
 <p><strong>Offline Inventory &amp; Retail Management for Windows</strong></p>
 <hr class="section-break" />
 <h2>Table of Contents</h2>
@@ -189,7 +189,7 @@
 <h2>2. Getting Started</h2>
 <h3>2.1 Installation</h3>
 <ol>
-<li>Run the installer: <code>InvoraLite v.1.0.0 DD-MM-YYYY x64-setup.exe</code> (date varies by build)</li>
+<li>Run the installer: <code>InvoraLite v.1.0.4 DD-MM-YYYY x64-setup.exe</code> (date varies by build)</li>
 <li>Follow the setup wizard</li>
 <li>Launch <strong>InvoraLite</strong> from the Start menu or desktop shortcut</li>
 </ol>
@@ -220,10 +220,13 @@
 <p>Click <strong>Complete Setup</strong> to finish.</p>
 <h3>2.4 Sign in</h3>
 <ol>
-<li>Enter your <strong>username</strong> and <strong>password</strong></li>
+<li>Enter your <strong>email/username</strong> and <strong>password</strong></li>
 <li>Click <strong>Sign In</strong></li>
 </ol>
-<p>The session automatically logs out after <strong>30 minutes</strong> of inactivity.</p>
+<p>If credentials are wrong, InvoraLite shows a clear <strong>Wrong credentials</strong> message. After several failed attempts the account may be temporarily locked.</p>
+<h3>2.5 Sign out</h3>
+<p>Use <strong>Logout</strong> in the sidebar or profile menu. You will be asked to confirm before signing out.</p>
+<p>The session also logs out automatically after <strong>30 minutes</strong> of inactivity.</p>
 <hr class="section-break" />
 <h2>3. User Roles &amp; Permissions</h2>
 <p>InvoraLite shows a <strong>role banner</strong> after login explaining what your account can do. Buttons, tabs, and forms you cannot use are hidden or disabled.</p>
@@ -532,14 +535,15 @@
 <td>Customer goods return — stock in + settlement (see §10.1)</td>
 </tr>
 <tr>
-<td><strong>Print Invoice</strong></td>
-<td>Print GST tax invoice for selected sale</td>
+<td><strong>Print</strong></td>
+<td>Choose <strong>Invoice</strong> (tax invoice) or <strong>Cash Memo</strong></td>
 </tr>
 <tr>
 <td><strong>Void Sale</strong></td>
 <td>Cancel entire sale, restore stock, reverse credit (password required)</td>
 </tr>
 </tbody></table>
+<p>When GST is enabled, the invoice shows <strong>Item | Qty | Price | GST | Total</strong>, with selling price, GST, and grand total breakdown. Printed invoices use a professional A4 tax-invoice layout with business branding (logo/letterhead when configured).</p>
 <p>Credit sales show payment status including settlements and outstanding balance.</p>
 <hr class="section-break" />
 <h2>10. Sales &amp; Purchase Returns</h2>
@@ -599,7 +603,15 @@
 <p>See [Section 12](#12-accounting--tax-reports).</p>
 <h3>11.5 Audit Log (Admin)</h3>
 <p>Browse system audit trail — logins, stock changes, sale voids, and other recorded actions. Use <strong>Refresh</strong> to update the list.</p>
-<h3>11.6 Backup (Admin — header menu)</h3>
+<h3>11.6 Software updates</h3>
+<p>Under <strong>Manage → Software updates</strong>:</p>
+<ol>
+<li>The installed version is shown automatically</li>
+<li>When a newer release is available, an <strong>Update Available</strong> banner appears</li>
+<li>Click <strong>Download &amp; install</strong> to update (desktop app only; requires internet)</li>
+</ol>
+<p>Updates are downloaded from Software Host Releases.</p>
+<h3>11.7 Backup (Admin — header menu)</h3>
 <p>Access <strong>Export Encrypted Backup</strong> and <strong>Restore Database</strong> from the profile menu (top-right, Admin only).</p>
 <hr class="section-break" />
 <h2>13. Accounting &amp; Tax Reports</h2>
@@ -728,7 +740,17 @@
 <tr>
 <td>Tax invoice</td>
 <td>Standard A4</td>
-<td>Invoice → Print Invoice</td>
+<td>Invoice → Print → Invoice</td>
+</tr>
+<tr>
+<td>Cash memo</td>
+<td>Standard A4</td>
+<td>Invoice → Print → Cash Memo</td>
+</tr>
+<tr>
+<td>Quotation estimation</td>
+<td>Standard A4</td>
+<td>Pricing → Quotations → Print</td>
 </tr>
 <tr>
 <td>Customer payment receipt</td>
@@ -747,6 +769,7 @@
 </tr>
 </tbody></table>
 <p>Use your system's print dialog to select the correct printer and paper size.</p>
+<p>Quotations can include products that are not yet in inventory (type a name and choose <strong>Add as new product</strong>). Converting a quotation to a sale creates missing products automatically when needed.</p>
 <hr class="section-break" />
 <h2>16. Frequently Asked Questions</h2>
 <h3>Does InvoraLite need internet?</h3>
@@ -796,7 +819,7 @@
 <td>Nu. (Bhutanese Ngultrum)</td>
 </tr>
 </tbody></table>
-<p>*This manual describes InvoraLite v1.0.0. Features may be updated in future releases.*</p>
+<p>*This manual describes InvoraLite v1.0.4. Features may be updated in future releases.*</p>
 <hr class="section-break" />
 <p><strong>© InvoraLite — EDP IT Department</strong></p>
     <p class="footer-note">InvoraLite User Manual v1.0.0 — Generated for offline retail and inventory management on Windows.</p>

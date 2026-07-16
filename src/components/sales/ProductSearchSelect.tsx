@@ -128,10 +128,11 @@ export function ProductSearchSelect({
     if (!open) return;
 
     if (e.key === "Enter") {
-      if (highlightIndex < 0 || optionCount === 0) return;
+      if (optionCount === 0) return;
       e.preventDefault();
-      if (highlightIndex < matches.length) {
-        pick(matches[highlightIndex]);
+      const index = highlightIndex < 0 ? (showAddNew ? matches.length : 0) : highlightIndex;
+      if (index < matches.length) {
+        pick(matches[index]);
       } else if (showAddNew) {
         addNew(query.trim());
       }

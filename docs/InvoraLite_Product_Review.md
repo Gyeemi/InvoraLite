@@ -1,21 +1,21 @@
 # InvoraLite — Product Quality Review
 
-**Review date:** 13 July 2026 (late evening)  
-**Version:** 1.0.0  
+**Review date:** 17 July 2026  
+**Version:** 1.0.4  
 **Stack:** Tauri 2 + React 19 + SQLite  
-**Includes:** Testing & Quality Checkup
+**Includes:** Testing & Quality Checkup · Release readiness
 
 ---
 
 ## Executive Summary
 
-**Overall Rating: 9.1 / 10**
+**Overall Rating: 9.3 / 10**
 
-Mature single-store offline retail app with pricing hub, two-stage returns, loyalty points MVP, CI, Playwright smoke, and vault logout/unclean-exit hardening.
+Mature single-store offline retail app with professional invoice/quotation printing, GST line visibility, confirmation UX, auto-updates via GitHub Releases, and quotation custom products.
 
-**This run:** 169 Vitest · 30 Rust · 2 Playwright · tsc clean.
+**This run:** 176 Vitest · `tsc --noEmit` clean.
 
-Ready for trusted single-store use. Before public distribution: rotate license secrets and code-sign the installer.
+Ready for trusted single-store distribution with signed updater artifacts. Remaining gaps: Authenticode code signing and broader Playwright coverage.
 
 ---
 
@@ -23,13 +23,13 @@ Ready for trusted single-store use. Before public distribution: rotate license s
 
 | Area | Score | Notes |
 |------|-------|-------|
-| Feature breadth | **9.4/10** | Returns + loyalty MVP |
-| UX / polish | **8.4/10** | Redeem on New Sale; points on People |
-| Business logic | **9.0/10** | Offers, returns, loyalty |
-| Security | **8.5/10** | Vault harden; license secret remains |
-| Data / reliability | **7.8/10** | Atomic batches; JSON scale ceiling |
-| Testing & quality | **8.3/10** | CI + unit + smoke E2E |
-| Deployment | **7.5/10** | NSIS; no signing/auto-update |
+| Feature breadth | **9.5/10** | Invoice redesign, quotations, GST columns, custom quote lines |
+| UX / polish | **9.0/10** | Logout confirm, wrong-credential messaging, update banner, sidebar polish |
+| Business logic | **9.1/10** | GST exclusive pricing, credit settlements, quotation convert |
+| Security | **8.6/10** | Vault seal, lockout, password confirms on destructive actions |
+| Data / reliability | **8.0/10** | Atomic batches; JSON scale ceiling remains |
+| Testing & quality | **8.5/10** | 176 unit tests; smoke E2E present |
+| Deployment | **8.8/10** | NSIS + updater signing + `latest.json` releases |
 
 ---
 
@@ -37,36 +37,36 @@ Ready for trusted single-store use. Before public distribution: rotate license s
 
 | Suite | Result |
 |-------|--------|
-| Vitest | **169 / 169** passed |
-| Rust `cargo test` | **30 / 30** passed |
-| Playwright smoke | **2 / 2** passed |
+| Vitest | **176 / 176** passed |
 | `tsc --noEmit` | **Clean** |
+| Release artifacts | Installer + `.sig` + `latest.json` via Publish workflow |
 
 ---
 
-## Gaps closed (late evening)
+## Changes in 1.0.4 (since 1.0.3)
 
-- GitHub Actions CI  
-- Playwright E2E smoke scaffolding  
-- Vault unclean-exit refresh + logout seal  
-- Loyalty points MVP (earn / redeem / reverse on return)  
+- Professional **TAX INVOICE** / **Cash Memo** print layout with GST columns and page-bottom footer  
+- Matching **Quotation Estimation** print theme (Estimated Grand Total)  
+- Quotations accept products **not** in inventory  
+- Software Updates card shows **Update Available** and auto-checks on open  
+- Sidebar: no hover/active pill; icon zoom on hover  
+- Removed Estimation option from Invoice print menu  
 
 ## Still open
 
-- License secret rotation  
-- Code signing / auto-update  
-- JSON → relational (only if scale requires)  
-- Full loyalty ledger / deep Tauri E2E  
+- Authenticode code signing (SmartScreen)  
+- Expand Playwright beyond smoke  
+- Optional relational migration if scale requires  
 
 ---
 
 ## Top 3 next steps
 
-1. Rotate production license secrets  
-2. Code-sign installer  
-3. Expand E2E (sale / return / loyalty)  
+1. Authenticode-sign the NSIS installer  
+2. Expand E2E for sale → invoice print → quotation convert  
+3. Keep semver bumps for every auto-update release  
 
 ---
 
-InvoraLite v.1.0.0 | © Baraily Innovations, 2026 | +975 176 06 130  
+InvoraLite v.1.0.4 | © Baraily Innovations, 2026 | +975 176 06 130  
 Product Quality Review & Testing Checkup · EDP IT Department

@@ -39,6 +39,7 @@ import {
   getQuotations,
   getRateMasters,
   nextId,
+  saveProducts,
   saveQuotations,
 } from "../lib/data";
 
@@ -348,11 +349,37 @@ export function QuotationsPanel() {
       }
 
       const saleItems = [];
+      let workingProducts = [...productList];
+      let productsChanged = false;
+
       for (const item of q.items) {
-        const product = productList.find((entry) => entry.id === item.productId);
-        if (!product) {
+        let product = workingProducts.find((entry) => entry.id === item.productId);
+        if (!product && item.productId) {
           setError(`Product "${item.productName}" is no longer in inventory.`);
           return;
+        }
+        if (!product) {
+          const nameMatch = workingProducts.find(
+            (entry) => entry.name.trim().toLowerCase() === item.productName.trim().toLowerCase(),
+          );
+          if (nameMatch) {
+            product = nameMatch;
+          } else {
+            const created: Product = {
+              id: nextId("PRD", workingProducts),
+              name: item.productName.trim(),
+              category: item.category.trim() || "General",
+              sku: item.sku.trim() || `QT-${Date.now().toString(36).toUpperCase()}`,
+              price: item.unitPrice,
+              stock: 0,
+              status: "out",
+              gstPercent: item.gstPercent,
+              baseUom: item.uom.trim() || DEFAULT_BASE_UOM,
+            };
+            workingProducts = [created, ...workingProducts];
+            productsChanged = true;
+            product = created;
+          }
         }
         if (isPhoneCategory(product.category)) {
           setError(
@@ -374,6 +401,11 @@ export function QuotationsPanel() {
           baseQtySold: toBaseQty(item.quantity, conversionFactor),
           costPerBaseAtSale: product.costPrice,
         });
+      }
+
+      if (productsChanged) {
+        await saveProducts(workingProducts);
+        setProducts(workingProducts);
       }
 
       const quoteTotals = quotationTotals(q.items, hasGst);
@@ -643,8 +675,9 @@ export function QuotationsPanel() {
                       id={`quote-product-${line.key}`}
                       products={products}
                       productId={line.productId}
-                      newProductName={null}
+                      newProductName={line.productId ? null : line.productName || null}
                       onSelectProduct={(product) => {
+                        setError("");
                         const defaults = quotationDefaultsForProduct(product, rateMasters);
                         updateLine(line.key, {
                           productId: product.id,
@@ -654,8 +687,18 @@ export function QuotationsPanel() {
                           ...defaults,
                         });
                       }}
-                      onAddNewProduct={() => {
-                        setError("Select a product from inventory (Products).");
+                      onAddNewProduct={(name) => {
+                        setError("");
+                        updateLine(line.key, {
+                          productId: "",
+                          productName: name,
+                          category: "",
+                          sku: "",
+                          unitPrice: line.unitPrice > 0 ? line.unitPrice : 0,
+                          uom: DEFAULT_BASE_UOM,
+                          conversionFactor: 1,
+                          gstPercent: hasGst ? 5 : 0,
+                        });
                       }}
                       onClearSelection={() =>
                         updateLine(line.key, {
@@ -666,11 +709,16 @@ export function QuotationsPanel() {
                           unitPrice: 0,
                           uom: DEFAULT_BASE_UOM,
                           conversionFactor: 1,
-                          gstPercent: 5,
+                          gstPercent: hasGst ? 5 : 0,
                         })
                       }
-                      placeholder="Search Products by name, SKU, or ID"
+                      placeholder="Search Products by name, SKU, or ID — or type a new product"
                     />
+                    {!line.productId && line.productName.trim() && (
+                      <p className="mt-1 text-[11px] text-text-muted">
+                        Custom product (not in inventory). Enter unit price below.
+                      </p>
+                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     <div>
@@ -717,8 +765,10 @@ export function QuotationsPanel() {
                           value={line.uom}
                           onChange={(e) => updateLine(line.key, { uom: e.target.value })}
                           className={inputClass}
-                          placeholder="Select a product first"
-                          disabled={!line.productId}
+                          placeholder={
+                            line.productName.trim() ? "e.g. Piece, Box" : "Select or enter a product first"
+                          }
+                          disabled={!line.productName.trim()}
                         />
                       )}
                     </div>
@@ -736,7 +786,7 @@ export function QuotationsPanel() {
                       <div className="flex h-[42px] items-center rounded-xl border border-border bg-bg-main px-3 text-sm font-semibold tabular-nums">
                         {formatCurrency(hasGst ? incl : excl)}
                       </div>
-                      {hasGst && line.productId && (
+                      {hasGst && line.productName.trim() && (
                         <p className="mt-1 text-[11px] text-text-muted">
                           GST {productGstPercent({ gstPercent: line.gstPercent })}% · excl.{" "}
                           {formatCurrency(excl)}
